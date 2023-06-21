@@ -119,13 +119,13 @@ def register_user(form_name: str, location: str='main', preauthorization=True) -
         if len(new_username) and len(new_name) and len(new_password) > 0:
             users = db.get_username(new_username)
             if users != None:
-                st.error(f"Ooops username dengan '{new_username}' sudah tersedia.", icon="❌")
+                st.error(f"❌ Ooops username dengan '{new_username}' sudah tersedia.")
                 return False;
             if new_password == new_password_repeat:
                 hashed_passwords = stauth.Hasher([new_password]).generate()[0]
                 db.insert_user(new_username, new_name, hashed_passwords)
-                st.success(f"Selamat anda sudah terdaftar {new_name}, **Silahkan login...**", icon="✔")
+                st.success(f"✔ Selamat anda sudah terdaftar {new_name}, **Silahkan login...**")
             else:
-                st.warning("Oops.. password tidak valid", icon="⚠")
+                st.warning("⚠ Oops.. password tidak valid")
         else:
-            st.warning("Tolong masukan username, name and password", icon="⚠")
+            st.warning("⚠ Tolong masukan username, name and password")
