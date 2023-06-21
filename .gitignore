@@ -118,6 +118,8 @@ celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
+*.csv
+*.xlsx
 
 # Environments
 .env
@@ -127,6 +129,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.streamlit/secrets.toml
 
 # Spyder project settings
 .spyderproject
