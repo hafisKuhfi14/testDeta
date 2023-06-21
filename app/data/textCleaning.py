@@ -37,10 +37,13 @@ def textCleaning(df, neutral = False):
     result = list(zip(*result))
     df["polarity_score"] = result[0]
     df["polarity"] = result[1]
-    print(df)
     if neutral == False :
         df = df[df.polarity != "neutral"]
     df_positive = df[df["polarity"] == "positive"]
     df_negative = df[df["polarity"] == "negative"]
+    print("positif ===============")
+    print(df_positive)
+    print("negatif ===============")
+    print(df_negative)
 
     return df
