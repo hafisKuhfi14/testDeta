@@ -34,6 +34,11 @@ def predictSVM(X_train, y_train, X_test, y_test):
     score_svmlk = score
     return score_svmlk, svmLinear, y_pred
 
+def predictFromPKL(tfidf, svm, text):
+    new_features = tfidf.transform([text]) 
+    y_pred = svm.predict(new_features)
+    return new_features, y_pred
+
 def plot_confusion_matrix_box(svmLinear, X_test, y_test, y_pred):
     plot_confusion_matrix(svmLinear, X_test, y_test)
     accuracy = accuracy_score(y_test, y_pred)

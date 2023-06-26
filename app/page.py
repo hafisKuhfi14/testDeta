@@ -1,5 +1,6 @@
 import streamlit as st  # pip install streamlit
 from streamlit_option_menu import option_menu  # pip install streamlit-option-menu
+import pickle
 import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
@@ -8,6 +9,9 @@ from .utils import utils
 from . import algorithm
 import database as db  # local import
 import streamlit_authenticator as stauth
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn import metrics
 
 def home():
     st.markdown("### Ulasan Pelanggan Berdasarkan Platform Media Sosial")
@@ -62,9 +66,9 @@ def home():
             "Total Data Latih": [data_latih],
             "Total Data Test": [data_test]
         }).reset_index(drop=True))
-
+        
         score_svmlk, svmLinear, y_pred = algorithm.predictSVM(X_train, y_train, X_test, y_test)
-        st.markdown(f"<center>Akurasi dengan menggunakan Support Vector Machine Linear Kernel: <b color='white'>{score_svmlk}</b></center>", unsafe_allow_html=True)
+        st.markdown(f"<center>Akurasi dengan menggunakan Support Vector Machine Linear Kernel: <b color='white'>{score_svmlk:.0%}</b></center>", unsafe_allow_html=True)
         accuracy = algorithm.plot_confusion_matrix_box(svmLinear=svmLinear, X_test=X_test, y_test=y_test, y_pred=y_pred)
         st.pyplot()
         # ====== end svm
@@ -95,15 +99,41 @@ def complaint(username):
         db.insert_complaint(username, comment)
         st.success("Data Saved..!")
 
-def text_predictor():
+async def text_predictor():
     st.markdown("### Input Ulasan")
     with st.form("text_predictor_form", clear_on_submit=True):
         text_predictor = st.text_area("Text Predictor", placeholder="Masukan ulasan anda yang akan dianalis")
+
         submit = st.form_submit_button("Analyze")
     "---"
     if submit:
-        st.write(textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=True))
-        st.success("Submited")
+        if text_predictor == "":
+            st.error("OOPPSS... Kolom ulasan tidak terisi")
+            return
+        
+        pickle_in = open('model.pkl', 'rb')
+        svm, tfidf = pickle.load(pickle_in)
+        new_features, y_pred = algorithm.predictFromPKL(tfidf, svm, text_predictor)
+        if (y_pred[0] == "negative"):
+            st.warning("Ulasan tersebut bernada negative 😔")
+        else:
+            st.success("Ulasan tersebut bernada positive 😊")
+
+        textPolarity = { "positive": [], "negative": [] }
+        for text in text_predictor.split(" "):
+            new_features, y_pred = algorithm.predictFromPKL(tfidf, svm, text) 
+            if (y_pred[0] == "negative" ):
+                textPolarity['negative'].append(text)
+            else:
+                textPolarity['positive'].append(text)
+
+        st.write("Sentimen Per-kata suatu ulasan")
+        # Temukan panjang maksimum dari array dalam dictionary
+        max_length = max(len(textPolarity[key]) for key in textPolarity) 
+        # Buat dictionary baru dengan panjang array yang sama untuk setiap kunci
+        data_equal_length = {key: textPolarity[key] + [""] * (max_length - len(textPolarity[key])) for key in textPolarity}
+        df = pd.DataFrame(data_equal_length) 
+        st.table(df)
 
 def register_user(form_name: str, location: str='main', preauthorization=True) -> bool:
     if location == 'main':

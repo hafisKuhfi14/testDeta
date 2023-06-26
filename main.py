@@ -1,5 +1,6 @@
 import calendar  # Core Python Module
 from datetime import datetime  # Core Python Module
+import asyncio
 
 import plotly.graph_objects as go  # pip install plotly
 import streamlit as st  # pip install streamlit
@@ -7,7 +8,6 @@ from streamlit_option_menu import option_menu  # pip install streamlit-option-me
 import streamlit.components.v1 as components
 import streamlit_authenticator as stauth  # pip install streamlit-authenticator
 
-import pickle
 import pandas as pd
 import plotly.express as px
 import database as db  # local import
@@ -63,8 +63,6 @@ if not st.session_state['authentication_status']:
 else:
     # -------------- SETTINGS --------------
     selected = None
-    pickle_in = open('model.pkl', 'rb')
-    svm = pickle.load(pickle_in)
 
     st.markdown("## Sentimen Analisis Ulasan Pelanggan IndiHome di PT.Telkom Indonesia 💹")
     components.html("""<hr style="height:2px;border:none;color:#333;background-color:white;margin-bottom: 1px"/>""", height=50)
@@ -112,4 +110,16 @@ else:
         authenticator.logout("Logout", "main")
 
     if selectedNavigationSidebar == "Text Predictor":
-        page.text_predictor()
+        asyncio.run(page.text_predictor())
+
+# async def main():
+#     users = db.fetch_all_users()
+#     usernames = [user['key'] for user in users]
+#     names = [user['name'] for user in users]
+#     passwords = [user['password'] for user in users]
+#     print(names)
+#     username = ""
+#     credentials = {"usernames":{}}
+
+# if __name__ == "__main__":
+#     asyncio.run(main())
