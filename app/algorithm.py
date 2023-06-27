@@ -35,7 +35,7 @@ def predictSVM(X_train, y_train, X_test, y_test):
     return score_svmlk, svmLinear, y_pred
 
 def predictFromPKL(tfidf, svm, text):
-    new_features = tfidf.transform([text]) 
+    new_features = tfidf.transform(text) 
     y_pred = svm.predict(new_features)
     return y_pred, new_features
 

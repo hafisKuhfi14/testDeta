@@ -4,14 +4,16 @@ import pickle
 import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
-from .data.textCleaning import textCleaning
+from .data.textCleaning import textCleaning, sentimentAnalysis
 from .utils import utils
 from . import algorithm
 import database as db  # local import
 import streamlit_authenticator as stauth
 
+from collections import Counter
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn import metrics
+import seaborn as sns
 
 def home():
     st.markdown("### Ulasan Pelanggan Berdasarkan Platform Media Sosial")
@@ -23,15 +25,21 @@ def home():
         icons=["twitter"],  # https://icons.getbootstrap.com/
         orientation="horizontal",
     )
-
-    # Text Cleaning ======
-    df = pd.read_csv("app/data/indihome3_scrape.csv")
-    df = textCleaning(df) 
-    data=df
-    # ====================
     
     # --- INPUT & SAVE PERIODS ---
     if selected == "Twitter":
+        # Text Cleaning ======
+        df = pd.read_csv("app/data/indihome3_scrape.csv")
+        df, df_positive, df_negative = textCleaning(df) 
+        data = df
+        # ====================
+        st.markdown("### <center> Total Sentiment Berdasarkan Topik</center>", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.dataframe(df_positive, use_container_width=True)
+        with col2:
+            st.dataframe(df_negative, use_container_width=True)
+        
         if st.checkbox("Show Data Limit 50"):
             st.write(data.head(50))
         tweets=st.sidebar.radio('Sentiment Type',('nothing','positive','negative'))
@@ -81,9 +89,6 @@ def home():
             data = pd.DataFrame(list(air_data.items()), columns=['polarity', 'Text_Clean_split'])
             air_data=data[data.polarity.isin(choice)]
 
-            # air_data = pd.DataFrame({'Text_Clean_split': list(air_data.values()), 'polarity': choice})
-            # air_data=data[data.Text_Clean_split.isin([f"{choice}"])]
-            # facet_col = 'airline_sentiment'
             print(air_data)
             print(choice)
             fig1 = px.histogram(data_frame=air_data, x='polarity', y='Text_Clean_split', histfunc='sum', color='polarity',labels={'polarity':'tweets'}, height=600, width=800)
@@ -113,24 +118,28 @@ async def text_predictor():
 
         pickle_in = open('model.pkl', 'rb')
         svm, tfidf = pickle.load(pickle_in)
-        text_predictor = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=True)
-        print("========== PRED")
-        print(text_predictor)
-        y_pred, new_features = algorithm.predictFromPKL(tfidf, svm, text_predictor['responding'][0])
+        text_predictor, _, _ = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=True)
+        y_pred, new_features = algorithm.predictFromPKL(tfidf, svm, text_predictor['Text_Clean'])
         if (y_pred[0] == "negative" or text_predictor['polarity'][0] == 'negative'):
-            st.warning("Ulasan tersebut bernada negative 😔")
+            st.error("Ulasan tersebut bernada negative 😡")
+        elif (y_pred[0] == "neutral" or text_predictor['polarity'][0] == 'neutral'):
+            st.warning("Ulasan tersebut bernada neutral 😔")
         else:
             st.success("Ulasan tersebut bernada positive 😊")
 
-        # ============= TABLE =====================
-        textPolarity = { "positive": [], "negative": [] }
-        for text in text_predictor['responding'][0].split(" "):
-            text = textCleaning(pd.DataFrame([text], columns=["responding"]), neutral=True)
-            y_pred, new_features = algorithm.predictFromPKL(tfidf, svm, text['responding'][0])
-            if (y_pred[0] == "negative" or text['polarity'][0] == 'negative'):
-                textPolarity['negative'].append(text['responding'][0])
+        textPolarity = { "positive": [], "negative": [], "neutral": [] }
+        for text in text_predictor['Text_Clean_split'][0]:
+            data = {"Text_Clean_split": [text]}
+            text, _, _ = sentimentAnalysis(pd.DataFrame([data], columns=["Text_Clean_split"]), True)
+            # result of text = { "Text_Clean_split": [ ["bagus"] ]  } 
+            y_pred, _ = algorithm.predictFromPKL(tfidf, svm, text["Text_Clean_split"][0])
+
+            if (y_pred[0] == "negative" or text["polarity"][0] == "negative"):
+                textPolarity['negative'].append(text["Text_Clean_split"][0][0])
+            elif (y_pred[0] == "neutral" or text["polarity"][0] == "neutral"):
+                textPolarity['neutral'].append(text["Text_Clean_split"][0][0])
             else:
-                textPolarity['positive'].append(text['responding'][0])
+                textPolarity['positive'].append(text["Text_Clean_split"][0][0])
 
         st.write("Sentimen Per-kata suatu ulasan")
         # Temukan panjang maksimum dari array dalam dictionary

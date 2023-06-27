@@ -22,6 +22,17 @@ def hitung_kemunculan(kalimat, array_kata):
     return result
 
 def Case_Folding(text):
+    # Definisikan pola regex untuk mencocokkan tag atau tagar
+    pattern = r"[@#]\w+"
+    
+    # Hapus tag atau tagar menggunakan metode sub() dari modul re
+    text_cleaned = re.sub(pattern, "", text)
+
+    # Definisikan pola regex untuk mendeteksi link
+    pattern = r"(http://|https://|www\.)\S+"
+    
+    # Hapus link menggunakan metode sub() dari modul re
+    text = re.sub(pattern, "", text_cleaned)
     # hapus non-ascii 
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("utf-8", "ignore")
     
@@ -51,10 +62,10 @@ def steamming():
     return stemmer
 
 def Slangwords(text, slang_dict):
-    for word in text.split():
-        if word in slang_dict.keys():
-            text = text.replace(word, slang_dict[word])
-    return text
+    words = text.split()
+    normalized_words = [slang_dict[word] if word in slang_dict else word for word in words]
+    normalized_text = ' '.join(normalized_words)
+    return normalized_text
 
 def stopwordRemoval():
     stopword = StopWord() 
@@ -73,24 +84,29 @@ def split_word(text):
 
 # Menghitung kata-kata positif / negatif pada teks dan menentukan sentimennya
 def sentiment_analysis_lexicon_indonesia(text, list_positive, list_negative):
+    positive_words = []
+    negative_words = []
+    neutral_words = []
     score = 0
     for word in text:
-        if (word in list_positive): 
+        if (word in list_positive):
             score += 1
-            
-    for word in text: 
-        if (word in list_negative): 
+            positive_words.append(word)
+        if (word in list_negative):
             score -= 1
-            
-    polarity = ""
+            negative_words.append(word)
+        if (word not in list_positive and word not in list_negative): 
+            neutral_words.append(word)
+
+    polarity=''
     if (score > 0):
-        polarity = "positive"
+        polarity = 'positive'
     elif (score < 0):
-        polarity = "negative"
+        polarity = 'negative'
     else:
-        polarity = "neutral"
+        polarity = 'neutral'
     
-    return score, polarity
+    return score, polarity, positive_words, negative_words
 
 def _register_credentials(self, username: str, name: str, password: str, email: str, preauthorization: bool):
     """

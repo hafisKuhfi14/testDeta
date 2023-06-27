@@ -20,6 +20,8 @@ https://www.youtube.com/watch?v=hRQ0j6Ssh-M
 
 https://github.com/taspinar/twitterscraper/blob/master/examples/get_twitter_user_data.py
 
+https://dribbble.com/shots/5846001-NLP-for-Customer-Feedback-WIP/attachments/5846001?mode=media
+
 ## 
 https://docs.google.com/document/d/1060bUlTITpycwgWK5ek7RMoocpdjIJZrgZwWem_hzvo/edit
 
