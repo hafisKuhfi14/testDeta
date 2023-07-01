@@ -3,6 +3,20 @@ from collections import Counter
 from ..utils import utils
 
 def textCleaning(df, neutral = False):
+    """TextCleaning
+
+    `>> Return`\n
+    function will return 2 variables, dataframe and result, 
+    in result there are 2 values namely, 
+    result[2] as positive, and result[3] as negative
+
+    ## Example 
+    ```python
+    df, result = textCleaning(dataframe)
+    print(result[2]) # positive 
+    print(result[3]) # negative
+    ```
+    """
     # ------- CaseFolding
     df["Text_Clean"] = df["responding"].apply(utils.Case_Folding)
     # ------- Lemmatisasi
@@ -26,9 +40,9 @@ def textCleaning(df, neutral = False):
     
     ## Memberi label pada data ulasan
     ### Pada dataset belum terdapat label positif dan negatif pada ulasan, sehingga perlu dilakukan pelabelan.
-    df, df_positive, df_negative = sentimentAnalysis(df, neutral)
+    df, result = sentimentAnalysis(df, neutral)
 
-    return df, df_positive, df_negative
+    return df, result
 
 def positiveOrNegativeDictionary():
     ## Daftar kosa kata positif Bahasa Indonesia
@@ -46,8 +60,16 @@ def sentimentAnalysis(df, neutral):
     result = list(zip(*result))
     df["polarity_score"] = result[0]
     df["polarity"] = result[1]
+    
     if neutral == False :
         df = df[df.polarity != "neutral"]
+    # result[2] as positive and result[3] as negative
+    return df, result
+
+def countTotalSentimentFrequency(df, result):
+    """Counting total sentiment positive & negative based on topik popular as frequency"""
+
+    df["month"] = pd.DatetimeIndex(df["postDate"]).month
     # Menggabungkan semua list kata positif dan negatif menjadi satu list
     all_positive_words = [word for sublist in result[2] for word in sublist]
     all_negative_words = [word for sublist in result[3] for word in sublist]
@@ -56,4 +78,12 @@ def sentimentAnalysis(df, neutral):
     positive_df = pd.DataFrame(Counter(all_positive_words).most_common(10), columns=['Words Positive', 'frequency'])
     negative_df = pd.DataFrame(Counter(all_negative_words).most_common(10), columns=['Words Negative', 'frequency'])
 
-    return df, positive_df, negative_df
+    # Menghitung frekuensi kata-kata positif dan negatif berdasarkan bulan
+    freq_by_month = df.groupby(["month", "polarity"]).size().reset_index(name="frequency")
+
+    # Membentuk pivot table untuk mendapatkan total frekuensi berdasarkan bulan
+    total_freq_by_month = freq_by_month.pivot_table(index="month", columns="polarity", values="frequency", aggfunc="sum", fill_value=0).reset_index()
+
+    print(total_freq_by_month)
+
+    return df, positive_df, negative_df, total_freq_by_month

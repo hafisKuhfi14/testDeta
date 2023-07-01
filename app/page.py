@@ -4,7 +4,7 @@ import pickle
 import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
-from .data.textCleaning import textCleaning, sentimentAnalysis
+from .data.textCleaning import textCleaning, sentimentAnalysis, countTotalSentimentFrequency
 from .utils import utils
 from . import algorithm
 import database as db  # local import
@@ -30,7 +30,10 @@ def home():
     if selected == "Twitter":
         # Text Cleaning ======
         df = pd.read_csv("app/data/indihome3_scrape.csv")
-        df, df_positive, df_negative = textCleaning(df) 
+        df, result = textCleaning(df) 
+        df, df_positive, df_negative, total_freq_by_month = countTotalSentimentFrequency(df, result)
+
+        st.write(total_freq_by_month)
         data = df
         # ====================
         st.markdown("### <center> Total Sentiment Berdasarkan Topik</center>", unsafe_allow_html=True)
@@ -51,16 +54,11 @@ def home():
         st.markdown("**Review Ulasan**")
         st.markdown(f"{dataPolarity[['Text_Clean']].sample(1).iat[0,0]}\n**[{dataPolarity[['polarity']].sample(1).iat[0,0]}]**")
         
-        select=st.sidebar.selectbox('Visualisation Of Tweets',['Histogram','Pie Chart'],key=1)
         sentiment=dataPolarity['polarity'].value_counts()
         sentiment=pd.DataFrame({'Sentiment':sentiment.index,'Tweets':sentiment.values})
         st.markdown("###  Sentiment count")
-        if select == "Histogram":
-            fig = px.bar(sentiment, x='Sentiment', y='Tweets', color = 'Tweets', height= 500)
-            st.plotly_chart(fig)
-        else:
-            fig = px.pie(sentiment, values='Tweets', names='Sentiment')
-            st.plotly_chart(fig)
+        fig = px.pie(sentiment, values='Tweets', names='Sentiment')
+        st.plotly_chart(fig)
         
         # ----- TFIDF
         df["Text_Clean_new"] = df["Text_Clean"].astype(str)
@@ -80,19 +78,6 @@ def home():
         accuracy = algorithm.plot_confusion_matrix_box(svmLinear=svmLinear, X_test=X_test, y_test=y_test, y_pred=y_pred)
         st.pyplot()
         # ====== end svm
-
-        st.sidebar.subheader("Tweet layanan IndiHome berdasarkan sentimen")
-        choice = st.sidebar.multiselect("Layanan", ('internet', 'telepon', 'tv', 'paket', 'jaringan', 'indihome'), key = '0')  
-        if len(choice)>0:
-            st.markdown("### Tweet berdasarkan sentimen")
-            air_data = utils.hitung_kemunculan(data.Text_Clean_split, choice)
-            data = pd.DataFrame(list(air_data.items()), columns=['polarity', 'Text_Clean_split'])
-            air_data=data[data.polarity.isin(choice)]
-
-            print(air_data)
-            print(choice)
-            fig1 = px.histogram(data_frame=air_data, x='polarity', y='Text_Clean_split', histfunc='sum', color='polarity',labels={'polarity':'tweets'}, height=600, width=800)
-            st.plotly_chart(fig1)
 
 def complaint(username):
     st.markdown("### Input Keluhan Pelanggan")
@@ -118,7 +103,7 @@ async def text_predictor():
 
         pickle_in = open('model.pkl', 'rb')
         svm, tfidf = pickle.load(pickle_in)
-        text_predictor, _, _ = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=True)
+        text_predictor, _ = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=True)
         y_pred, new_features = algorithm.predictFromPKL(tfidf, svm, text_predictor['Text_Clean'])
         if (y_pred[0] == "negative" or text_predictor['polarity'][0] == 'negative'):
             st.error("Ulasan tersebut bernada negative 😡")
@@ -130,7 +115,7 @@ async def text_predictor():
         textPolarity = { "positive": [], "negative": [], "neutral": [] }
         for text in text_predictor['Text_Clean_split'][0]:
             data = {"Text_Clean_split": [text]}
-            text, _, _ = sentimentAnalysis(pd.DataFrame([data], columns=["Text_Clean_split"]), True)
+            text, _ = sentimentAnalysis(pd.DataFrame([data], columns=["Text_Clean_split"]), True)
             # result of text = { "Text_Clean_split": [ ["bagus"] ]  } 
             y_pred, _ = algorithm.predictFromPKL(tfidf, svm, text["Text_Clean_split"][0])
 
