@@ -1,11 +1,13 @@
-import re, string, unicodedata
+import re, unicodedata
 from nlp_id.lemmatizer import Lemmatizer
-from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from nlp_id.stopword import StopWord 
+from nlp_id.tokenizer import Tokenizer
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import nltk
-from nltk import word_tokenize, sent_tokenize
+from nltk import word_tokenize
 from streamlit_authenticator.exceptions import RegisterError
 
+tokenizer = Tokenizer()
 unwanted_words = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'uaddown', 'weareuad', 'lam', 'https', 'igshid']
 nltk.download("punkt")
 
@@ -22,6 +24,15 @@ def hitung_kemunculan(kalimat, array_kata):
     return result
 
 def Case_Folding(text):
+    # Mengubah text menjadi lowercase
+    text = text.lower()
+    
+    # Menghapus white space
+    text = re.sub('[\s]+', ' ', text)
+    
+    return text
+
+def Cleansing(text):
     # Definisikan pola regex untuk mencocokkan tag atau tagar
     pattern = r"[@#]\w+"
     
@@ -42,20 +53,16 @@ def Case_Folding(text):
     # Menghapus angka
     text = re.sub("\S*\d\S*", "", text).strip()
     text = re.sub("\b\d+\b", " ", text)
-    
-    # Mengubah text menjadi lowercase
-    text = text.lower()
-    
-    # Menghapus white space
-    text = re.sub('[\s]+', ' ', text)
-    
     return text
 
 def lemmatisasi():
+    """
+        mengembalikan kata kepada kata dasarnya yang disesuaikan dengan kamus Bahasa Indonesia
+    """
     lemmatizer = Lemmatizer()
     return lemmatizer
 
-def steamming():
+def stemming():
     # membuat stemmer
     factory = StemmerFactory()
     stemmer = factory.create_stemmer()
@@ -77,10 +84,7 @@ def RemoveUnwantedWords(text):
     return ' '.join(fillterd_sentence)
 
 def split_word(text):
-    list_text = []
-    for txt in text.split(" "):
-        list_text.append(txt)
-    return list_text
+    return tokenizer.tokenize(text)
 
 # Menghitung kata-kata positif / negatif pada teks dan menentukan sentimennya
 def sentiment_analysis_lexicon_indonesia(text, list_positive, list_negative):
@@ -132,3 +136,10 @@ def _register_credentials(self, username: str, name: str, password: str, email: 
         raise RegisterError('Name is not valid')
     if not self.validator.validate_email(email):
         raise RegisterError('Email is not valid')
+    
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False

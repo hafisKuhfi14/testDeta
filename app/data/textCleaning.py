@@ -19,10 +19,12 @@ def textCleaning(df, neutral = False):
     """
     # ------- CaseFolding
     df["Text_Clean"] = df["responding"].apply(utils.Case_Folding)
+    # ------- Cleansing
+    df["Text_Clean"] = df["Text_Clean"].apply(utils.Cleansing)
     # ------- Lemmatisasi
     df["Text_Clean"] = df["Text_Clean"].apply(utils.lemmatisasi().lemmatize)
     # ------- Steaming
-    df["Text_Clean"] = df["Text_Clean"].apply(utils.steamming().stem)
+    df["Text_Clean"] = df["Text_Clean"].apply(utils.stemming().stem)
 
     # ------- Slangword Standrization
     slang_dictionary = pd.read_csv("https://raw.githubusercontent.com/insomniagung/kamus_kbba/main/kbba.txt", delimiter="\t", names=['slang', 'formal'], header=None, encoding='utf-8')
@@ -55,6 +57,18 @@ def positiveOrNegativeDictionary():
     return list_positive, list_negative
 
 def sentimentAnalysis(df, neutral):
+    """Melakukan labeling terhadap sentiment pada `dataframe['Text_Clean_split']`
+
+    Parameters
+    -------
+    `df` 
+        sebagai dataframe dan 
+    `neutral` 
+        adalah indikator apakah menggunakan netral atau tidak\n
+    Returns
+    -------
+    `result[2] as positive and result[3] as negative`
+    """
     list_positive, list_negative = positiveOrNegativeDictionary()
     result = df["Text_Clean_split"].apply(lambda text: utils.sentiment_analysis_lexicon_indonesia(text=text, list_positive=list_positive, list_negative=list_negative))
     result = list(zip(*result))
@@ -63,7 +77,7 @@ def sentimentAnalysis(df, neutral):
     
     if neutral == False :
         df = df[df.polarity != "neutral"]
-    # result[2] as positive and result[3] as negative
+    
     return df, result
 
 def countTotalSentimentFrequency(df, result):

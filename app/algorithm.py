@@ -5,15 +5,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 from sklearn import metrics
 
-from sklearn.metrics import accuracy_score, plot_confusion_matrix 
+from sklearn.metrics import accuracy_score, plot_confusion_matrix, confusion_matrix
+from sklearn.metrics import classification_report
 
 def tfidf(df):
-    tfidf = TfidfVectorizer()
+    tfidf = TfidfVectorizer(max_features=len(df['Text_Clean_new']))
     review = df["Text_Clean_new"].values.tolist()
     tfidf_vector = tfidf.fit(review)
     X = tfidf_vector.transform(review)
     y = df["polarity"]
-    print(X[0:2])
+    # print(X[0:2])
     return X, y 
 
 def train_test_splitTFIDF(X, y, testSize, randState):
@@ -40,6 +41,11 @@ def predictFromPKL(tfidf, svm, text):
     return y_pred, new_features
 
 def plot_confusion_matrix_box(svmLinear, X_test, y_test, y_pred):
-    plot_confusion_matrix(svmLinear, X_test, y_test)
+    cm = confusion_matrix(y_test, y_pred)
     accuracy = accuracy_score(y_test, y_pred)
-    return accuracy
+
+    return accuracy, cm
+
+def classificationReport(y_test, y_pred):
+    report = classification_report(y_test, y_pred)
+    return report
