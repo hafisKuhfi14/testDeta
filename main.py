@@ -44,8 +44,7 @@ authenticator = stauth.Authenticate(credentials, "app_home", "auth", cookie_expi
 # print(authenticator.credentials)
 
 authenticator._check_cookie()
-if not st.session_state['authentication_status']: 
-    print("Masuk IF")
+if not st.session_state['authentication_status']:  
     selected = option_menu(
         menu_title=None,
         options=["Login", "Register"],
@@ -97,14 +96,14 @@ else:
 
     if selectedNavigationSidebar == "Home": 
         # The main window
-        page.home()
+        asyncio.run(page.home())
         
     if selectedNavigationSidebar == "Projects":
         st.title("Projects Page")
         # The main window
 
     if selectedNavigationSidebar == "Keluhan":
-        page.complaint(username)
+        page.complaint()
 
     if selectedNavigationSidebar == "logout":
         authenticator.logout("Logout", "main")

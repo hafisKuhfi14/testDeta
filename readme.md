@@ -25,5 +25,10 @@ https://dribbble.com/shots/5846001-NLP-for-Customer-Feedback-WIP/attachments/584
 ## 
 https://docs.google.com/document/d/1060bUlTITpycwgWK5ek7RMoocpdjIJZrgZwWem_hzvo/edit
 
+## Rumus Hitung Accuracy & classication_report
+https://medium.com/@kennymiyasato/classification-report-precision-recall-f1-score-accuracy-16a245a437a5
+
+## TFIDF
+https://www.youtube.com/watch?v=f0a1XXmaQp8
 username = pparker
 password = abc123

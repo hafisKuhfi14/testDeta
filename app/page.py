@@ -6,19 +6,19 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 from .data.textCleaning import sentimentAnalysis, textCleaning, countTotalSentimentFrequency, positiveOrNegativeDictionary
 from .utils import utils
-from . import algorithm
+from .models import algorithm
 import database as db  # local import
 import streamlit_authenticator as stauth
 import seaborn as sns
 
-def home():
+async def home():
     st.markdown("### Ulasan Pelanggan Berdasarkan Platform Media Sosial")
     st.write("pilih media sosial mana yang ingin kamu analisis")
     # --- NAVIGATION MENU ---
     selected = option_menu(
         menu_title=None,
-        options=["Twitter"],
-        icons=["twitter"],  # https://icons.getbootstrap.com/
+        options=["Twitter", "Facebook"],
+        icons=["twitter", "facebook"],  # https://icons.getbootstrap.com/
         orientation="horizontal",
     )
     
@@ -161,8 +161,20 @@ def home():
         # ----- TFIDF
         df["Text_Clean_new"] = df["Text_Clean_split"].astype(str)
         X, y = algorithm.tfidf(df=df)
+        rankingData = algorithm.calculate_tfidf_ranking(df)
+        hah = algorithm.hitung_kamus(df=df)
         with tfidf:
             st.markdown("####  TFIDF")
+            
+            ranking = pd.DataFrame(rankingData, columns=['Frequency', 'TF-IDF', 'Term'])
+            ranking.sort_values('Frequency', ascending=False, inplace=True)
+            st.dataframe(ranking)
+
+            # Membuat DataFrame dari kamus
+            df_kamus = pd.DataFrame.from_dict(hah, orient='index')
+            df_kamus.index.name = 'Kata'
+            st.dataframe(df_kamus)
+
             st.text(X[0:2])
 
         with wordCloud:
@@ -184,51 +196,65 @@ def home():
         with confusionMatrix:
             accuracy, confusionMatrixData = algorithm.plot_confusion_matrix_box(svmLinear=svmLinear, X_test=X_test, y_test=y_test, y_pred=y_pred)
             cm_df = pd.DataFrame(confusionMatrixData, index=["Positive", "Negative"], columns=["Positive", "Negative"])
-
             plt.figure(figsize=(5,4))
             sns.heatmap(cm_df, annot=True, fmt='g')
             plt.title('Confusion Matrix')
             plt.ylabel("Actual Value")
             plt.xlabel("Predicted Value")
-            st.write({
-                "True Positive": confusionMatrixData[1,1],
-                "True Negative": confusionMatrixData[0,0],
-                "False Positive": confusionMatrixData[0,1],
-                "False Negative": confusionMatrixData[1,0]
+            
+            TP = confusionMatrixData[0,0]
+            TN = confusionMatrixData[1,1]
+            FP = confusionMatrixData[1,0]
+            FN = confusionMatrixData[0,1]
+            resultAccuracy = (TN + TP) / (TP + TN + FP + FN)
+            
+            st.table({
+                "Result Predict": [TP,TN,FP,FN],
+                "Label": [
+                    "True Positive", "True Negative", "False Positive", "False Negative"
+                ],
+                "alias": ["TP", "TN", "FP", "FN"]
             })
+            rumusCol1, perhitunganCol2 = st.columns(2)
+            with rumusCol1:    
+                st.markdown("#### Rumus Accuracy")
+                st.latex(r'''
+                    \frac{TP + TN}{TP + TN + FP + FN} = Accuracy
+                ''')
+            with perhitunganCol2:
+                st.markdown("#### Calculate Accuracy")
+                st.latex(r'''
+                    \frac{%d + %d}{%d + %d + %d + %d} = %s
+                ''' % (TP, TN, TP, TN, FP, FN, resultAccuracy))
+
             st.pyplot()
 
-        data = {}
-        perHeader = {}
-        class_label = ""
-        index = 0
         with classificationReport:
             report = algorithm.classificationReport(y_test, y_pred)
+            data1 = []
             lines = report.strip().split("\n")
             header = lines[0].split(" ")
             header = list(filter(bool, header))
             header.insert(0," ")
+            data1.append(header)
 
             for line in lines[1:]:
-                perHeader = {}
-                class_label = ""
-                index = 0
                 columns = line.strip().split(" ")
                 columns = list(filter(bool, columns)) 
+                
+                if (len(columns) == 3):
+                    columns.insert(1, " ")
+                    columns.insert(2, " ")
                 if(len(columns) != 0):
-                    class_label = columns[0]
-                    if (not utils.isfloat(columns[1])): class_label += " " + columns[1]
-                    data[class_label] = ""
+                    if (not utils.isfloat(columns[1]) and columns[1] != " "):
+                        columns[0] += " " + columns[1]
+                        columns.pop(1) 
+                    data1.append(columns)
+            
+            st.dataframe(pd.DataFrame(data1[1:], columns=data1[0]), use_container_width=True)
 
-                    for column in columns: 
-                        if (utils.isfloat(column)):
-                            index += 1
-                            perHeader[header[index]] = column
-                    
-                    data[class_label] = perHeader
-                    
-            st.dataframe(data, use_container_width=True)
-
+    if selected == "facebook":
+        st.markdown("## Facebook")
         # df, result = sentimentAnalysis(df, False)
         # df, df_positive, df_negative, total_freq_by_month = countTotalSentimentFrequency(df, result)
 
@@ -272,15 +298,41 @@ def home():
         # st.pyplot()
         # ====== end svm
 
-def complaint(username):
+def complaint():
     st.markdown("### Input Keluhan Pelanggan")
-    with st.form('complaint_form', clear_on_submit=True):
-        comment = st.text_area("masukan keluhan kamu", placeholder="Masukan komplen anda terkait layanan tertentu......")
-        submit = st.form_submit_button("Send")
-    "---"
-    if submit:
-        db.insert_complaint(username, comment)
-        st.success("Data Saved..!")
+    username = st.session_state['username']
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    for message in st.session_state.messages:
+        with st.chat_message(message['role']):
+            if (message['role'] == 'user'):
+                st.markdown(f"##### :red[{username}]")
+            st.markdown(message['content'])
+
+    if prompt := st.chat_input("Whats is up ?"):
+        with st.chat_message("user"):
+            st.markdown(f"##### :red[{username}]")
+            st.markdown(prompt)
+        st.session_state.messages.append({
+            "role": "user",
+            "content": prompt
+        })
+        response = f"echo: {prompt}"
+        with st.chat_message("assistant"):
+            st.markdown(response)
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": response
+        })
+
+    # with st.form('complaint_form', clear_on_submit=True):
+    #     comment = st.text_area("masukan keluhan kamu", placeholder="Masukan komplen anda terkait layanan tertentu......")
+    #     submit = st.form_submit_button("Send")
+    # "---"
+    # if submit:
+    #     db.insert_complaint(username, comment)
+    #     st.success("Data Saved..!")
 
 async def text_predictor():
     st.markdown("### Input Ulasan")
