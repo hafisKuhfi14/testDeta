@@ -32,3 +32,6 @@ https://medium.com/@kennymiyasato/classification-report-precision-recall-f1-scor
 https://www.youtube.com/watch?v=f0a1XXmaQp8
 username = pparker
 password = abc123
+
+## Straemlit-chat
+https://pypi.org/project/streamlit-chat/

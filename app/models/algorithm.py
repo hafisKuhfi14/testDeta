@@ -55,8 +55,12 @@ def classificationReport(y_test, y_pred):
 def calculate_tfidf_ranking(df): 
         max_features = 10
 
+        count_vectorizer = CountVectorizer(tokenizer=word_tokenize)
+        ulasan = df['Text_Clean_new'].values.tolist()
+        X_count = count_vectorizer.fit_transform(ulasan)
+
         tf_idf = TfidfVectorizer(max_features=max_features, binary=True)
-        tfidf_mat = tf_idf.fit_transform(df["Text_Clean"]).toarray()
+        tfidf_mat = tf_idf.fit_transform(df["Text_Clean_new"]).toarray()
         print(tfidf_mat)
         terms = tf_idf.get_feature_names_out()
         # print(tfidf_mat)
@@ -92,8 +96,8 @@ def hitung_kamus(df):
     kamus = {}
     for i, kata in enumerate(kata_unik):
         kamus[kata] = {
-            'Frekuensi': X_count[:, i].sum(),
-            'TF-IDF': tfidf.idf_[tfidf.vocabulary_[kata]]
+            'TF': X_count[:, i].sum(),
+            'IDF': tfidf.idf_[tfidf.vocabulary_[kata]]
         }
 
     return kamus

@@ -1,6 +1,6 @@
 import streamlit_authenticator as stauth
 
-import database as db
+import app.db.database as db
 
 usernames = ["pparker", "rmiller"]
 names = ["Peter Parker", "Rebecca Miller"]

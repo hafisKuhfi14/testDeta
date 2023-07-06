@@ -10,7 +10,7 @@ import streamlit_authenticator as stauth  # pip install streamlit-authenticator
 
 import pandas as pd
 import plotly.express as px
-import database as db  # local import
+import app.db.database as db  # local import
 import ast
 from app import page
 

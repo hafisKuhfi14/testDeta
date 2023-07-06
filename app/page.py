@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 from .data.textCleaning import sentimentAnalysis, textCleaning, countTotalSentimentFrequency, positiveOrNegativeDictionary
 from .utils import utils
 from .models import algorithm
-import database as db  # local import
+import app.db.database as db  # local import
 import streamlit_authenticator as stauth
 import seaborn as sns
+import random
 
 async def home():
     st.markdown("### Ulasan Pelanggan Berdasarkan Platform Media Sosial")
@@ -22,239 +23,243 @@ async def home():
         orientation="horizontal",
     )
     
+    # df = None
     # --- INPUT & SAVE PERIODS ---
-    if selected == "Twitter":
-        # Text Cleaning ======
+    if (selected == "Twitter"):
         df = pd.read_csv("app/data/indihome3_scrape.csv")
-        if st.checkbox("Show Data Limit 50"):
-            st.write(df.head(50))
-
-        expandData = st.checkbox("Expand All Data")
-
-        st.markdown("### Text Cleaning")        
-        resultCleaning, caseFolding, cleansing = st.tabs(["Hasil Text Cleaning", "CaseFolding", "Cleansing"])
-
-        st.markdown("### Data Normalization")
-        resultNormalize, lemmatization, stemming, slangword = st.tabs(["Hasil Normalize", "Lemmatization", "Stemming", "SlangWord"])
-
-        st.markdown("### Word Removal")
-        resultWordRemoval, stopwordRemoval, unwantedRemoval, shortWord = st.tabs(["Hasil Word Removal", "Stopword Removal", "Unwanted Word", "ShortWord"])
-
-        st.markdown("### Tokenizing")
-        splitWords, labeling, circleDiagram, wordCloud, tfidf = st.tabs(["Split Words", "Labeling", "Circle Diagram", "WordCloud", "TF-IDF"])
-
-        st.markdown("### Modeling")
-        SVMModel, trainAndTest = st.tabs(["Support Vector Machine", "Train & Test Data"])
-
-        st.markdown("### Performance Evaluation")
-        classificationReport, confusionMatrix = st.tabs(["Classification Report", "Confusion Matrix"])
-
-        # ------- CaseFolding
-        df["Text_Clean"] = df["responding"].apply(utils.Case_Folding)
-        with caseFolding:
-            with st.expander("Show Data CaseFolding", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
-                
-        # ------- Cleansing
-        df["Text_Clean"] = df["Text_Clean"].apply(utils.Cleansing)
-        with cleansing:
-            with st.expander("Show Data Cleansing", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
         
-        # ------- Result Text Cleaning
-        with resultCleaning:
-            with st.expander("Show Data Hasil Cleaning", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    if (selected == "Facebook"):
+        df = pd.read_csv("app/data/indihome3_facebookscrape.csv")
 
-        # ------- Lemmatisasi
-        df["Text_Clean"] = df["Text_Clean"].apply(utils.lemmatisasi().lemmatize)
-        with lemmatization:
-            with st.expander("Show Data Lemmatisasi", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    # print(df)
+    # Text Cleaning ======
+    if st.checkbox("Show Data Limit 50"):
+        st.write(df.head(50))
 
-        # ------- Steaming
-        df["Text_Clean"] = df["Text_Clean"].apply(utils.stemming().stem)
-        with stemming:
-            with st.expander("Show Data Stemming", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    expandData = st.checkbox("Expand All Data")
 
-        # ------- Slangword Standrization   
-        slang_dictionary = pd.read_csv("https://raw.githubusercontent.com/insomniagung/kamus_kbba/main/kbba.txt", delimiter="\t", names=['slang', 'formal'], header=None, encoding='utf-8')
-        slang_dict = pd.Series(slang_dictionary["formal"].values, index = slang_dictionary["slang"]).to_dict()
-        df["Text_Clean"] = df["Text_Clean"].apply(lambda text: utils.Slangwords(text, slang_dict))
-        df["Text_Clean"] = df["Text_Clean"].str.replace("mhs", "mahasiswa")        
-        with slangword:
-            with st.expander("Show Data Slangword Standarization", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    st.markdown("### Text Cleaning")        
+    resultCleaning, caseFolding, cleansing = st.tabs(["Hasil Text Cleaning", "CaseFolding", "Cleansing"])
 
-        # ------- Hasil Normalize
-        with resultNormalize:
-            with st.expander("Show Data Hasil Normalize", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    st.markdown("### Data Normalization")
+    resultNormalize, lemmatization, stemming, slangword = st.tabs(["Hasil Normalize", "Lemmatization", "Stemming", "SlangWord"])
 
-        # ------- Stopword Removal
-        df["Text_Clean"] = df["Text_Clean"].apply(utils.stopwordRemoval().remove_stopword)
-        with stopwordRemoval:
-            with st.expander("Show Data Stopword Removal", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    st.markdown("### Word Removal")
+    resultWordRemoval, stopwordRemoval, unwantedRemoval, shortWord = st.tabs(["Hasil Word Removal", "Stopword Removal", "Unwanted Word", "ShortWord"])
+
+    st.markdown("### Tokenizing")
+    splitWords, labeling, circleDiagram, wordCloud, tfidf = st.tabs(["Split Words", "Labeling", "Circle Diagram", "WordCloud", "TF-IDF"])
+
+    st.markdown("### Modeling")
+    SVMModel, trainAndTest = st.tabs(["Support Vector Machine", "Train & Test Data"])
+
+    st.markdown("### Performance Evaluation")
+    classificationReport, confusionMatrix = st.tabs(["Classification Report", "Confusion Matrix"])
+
+    # ------- CaseFolding
+    df["Text_Clean"] = df["responding"].apply(utils.Case_Folding)
+    with caseFolding:
+        with st.expander("Show Data CaseFolding", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+            
+    # ------- Cleansing
+    df["Text_Clean"] = df["Text_Clean"].apply(utils.Cleansing)
+    with cleansing:
+        with st.expander("Show Data Cleansing", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    
+    # ------- Result Text Cleaning
+    with resultCleaning:
+        with st.expander("Show Data Hasil Cleaning", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+
+    # ------- Lemmatisasi
+    df["Text_Clean"] = df["Text_Clean"].apply(utils.lemmatisasi().lemmatize)
+    with lemmatization:
+        with st.expander("Show Data Lemmatisasi", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+
+    # ------- Steaming
+    df["Text_Clean"] = df["Text_Clean"].apply(utils.stemming().stem)
+    with stemming:
+        with st.expander("Show Data Stemming", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+
+    # ------- Slangword Standrization   
+    slang_dictionary = pd.read_csv("https://raw.githubusercontent.com/insomniagung/kamus_kbba/main/kbba.txt", delimiter="\t", names=['slang', 'formal'], header=None, encoding='utf-8')
+    slang_dict = pd.Series(slang_dictionary["formal"].values, index = slang_dictionary["slang"]).to_dict()
+    df["Text_Clean"] = df["Text_Clean"].apply(lambda text: utils.Slangwords(text, slang_dict))
+    df["Text_Clean"] = df["Text_Clean"].str.replace("mhs", "mahasiswa")        
+    with slangword:
+        with st.expander("Show Data Slangword Standarization", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+
+    # ------- Hasil Normalize
+    with resultNormalize:
+        with st.expander("Show Data Hasil Normalize", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+
+    # ------- Stopword Removal
+    df["Text_Clean"] = df["Text_Clean"].apply(utils.stopwordRemoval().remove_stopword)
+    with stopwordRemoval:
+        with st.expander("Show Data Stopword Removal", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    
+    # ------- Unwanted Word Removal
+    df["Text_Clean"] = df["Text_Clean"].apply(utils.RemoveUnwantedWords)
+    with unwantedRemoval:
+        st.markdown("## Unwanted Word Removal")
+        with st.expander("Show Data Unwanted Word Removal", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    
+    ## Menghapus kata yang kurang dari 3 huruf
+    df["Text_Clean"] = df["Text_Clean"].str.findall('\w{3,}').str.join(' ')
+    with shortWord:
+        with st.expander("Show Data Shortword", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    
+    with resultWordRemoval:
+        with st.expander("Show Data Hasil Word Removal", expandData):
+            st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+
+    # ------- SplitWord    
+    df["Text_Clean_split"] = df["Text_Clean"].apply(utils.split_word)
+    with splitWords:
+        with st.expander("Show Data Splitword", expandData):
+            st.dataframe(df['Text_Clean_split'].head(20), use_container_width=True)
+    
+    # ------- labeling
+    list_positive, list_negative = positiveOrNegativeDictionary()
+    result = df["Text_Clean_split"].apply(lambda text: utils.sentiment_analysis_lexicon_indonesia(text=text, list_positive=list_positive, list_negative=list_negative))
+    result = list(zip(*result))
+    df["polarity_score"] = result[0]
+    df["polarity"] = result[1]
+    df = df[df.polarity != "neutral"]
+    with labeling:
+        textAndPolarity = {
+            "TextClean": df['Text_Clean'],
+            "polarity": df["polarity"]
+        }
+        st.markdown("#### Daftar Library Positive & Negative")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.dataframe({"Positive Dictionary": list_positive}, use_container_width=True)
+        with col2:
+            st.dataframe({"Negative Dictionary": list_negative}, use_container_width=True)
+
+        with st.expander("Show Data Labeling", expandData):
+            st.dataframe(pd.DataFrame(textAndPolarity).head(20), use_container_width=True)
         
-        # ------- Unwanted Word Removal
-        df["Text_Clean"] = df["Text_Clean"].apply(utils.RemoveUnwantedWords)
-        with unwantedRemoval:
-            st.markdown("## Unwanted Word Removal")
-            with st.expander("Show Data Unwanted Word Removal", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+        st.dataframe(pd.DataFrame([{
+            "Total Positive": len(result[2]),
+            "Total Negative": len(result[3])
+        }]), use_container_width=True)
+    
+    # ------- Circle Diagram
+    with circleDiagram:
+        st.markdown("####  Sentiment count")
+        sentimentPolarity = df['polarity'].value_counts()
+        PdSentimentPolarity = pd.DataFrame({'Sentiment':sentimentPolarity.index,'Tweets':sentimentPolarity.values})
+        st.markdown(f"total keseluruhan ulasan yang sudah melewati tahap cleaning adalah sebanyak: **{sentimentPolarity['positive'] + sentimentPolarity['negative']}**")
+        fig = px.pie(PdSentimentPolarity, values='Tweets', names='Sentiment')
+        st.plotly_chart(fig)
+        st.markdown(f"Dari hasil perhitungan diketahui sentiment positive sebanyak **{sentimentPolarity['positive']}** dan sentiment negative sebanyak **{sentimentPolarity['negative']}**\n")
         
-        ## Menghapus kata yang kurang dari 3 huruf
-        df["Text_Clean"] = df["Text_Clean"].str.findall('\w{3,}').str.join(' ')
-        with shortWord:
-            with st.expander("Show Data Shortword", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+    # ----- TFIDF
+    df["Text_Clean_new"] = df["Text_Clean_split"].astype(str)
+    X, y = algorithm.tfidf(df=df)
+    rankingData = algorithm.calculate_tfidf_ranking(df)
+    hah = algorithm.hitung_kamus(df=df)
+    with tfidf:
+        st.markdown("####  TFIDF")
         
-        with resultWordRemoval:
-            with st.expander("Show Data Hasil Word Removal", expandData):
-                st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
+        ranking = pd.DataFrame(rankingData, columns=['Frequency', 'TF-IDF', 'Term'])
+        ranking.sort_values('Frequency', ascending=False, inplace=True)
+        st.dataframe(ranking)
 
-        # ------- SplitWord    
-        df["Text_Clean_split"] = df["Text_Clean"].apply(utils.split_word)
-        with splitWords: 
-            with st.expander("Show Data Splitword", expandData):
-                st.dataframe(df['Text_Clean_split'].head(20), use_container_width=True)
+        # Membuat DataFrame dari kamus
+        df_kamus = pd.DataFrame.from_dict(hah, orient='index')
+        df_kamus.index.name = 'Kata'
+        st.dataframe(df_kamus)
+
+        st.text(X[0:2])
+
+    with wordCloud:
+        st.markdown("#### Wordcloud")
+
+    X_train, X_test, y_train, y_test, data_latih, data_test, all_data = algorithm.train_test_splitTFIDF(X=X, y=y, testSize = 0.1, randState = 0)
+    with trainAndTest:
+        st.dataframe(pd.DataFrame({
+            "Total Keseluruhan data": [all_data],
+            "Total Data Latih": [data_latih],
+            "Total Data Test": [data_test]
+        }).reset_index(drop=True), use_container_width=True)
+
+    score_svmlk, svmLinear, y_pred = algorithm.predictSVM(X_train, y_train, X_test, y_test)
+    with SVMModel:
+        st.markdown(f"<center>Akurasi dengan menggunakan Support Vector Machine Linear Kernel: <b color='white'>{score_svmlk:.0%}</b></center>", unsafe_allow_html=True)
+        # st.pyplot()
+
+    with confusionMatrix:
+        accuracy, confusionMatrixData = algorithm.plot_confusion_matrix_box(svmLinear=svmLinear, X_test=X_test, y_test=y_test, y_pred=y_pred)
+        cm_df = pd.DataFrame(confusionMatrixData, index=["Positive", "Negative"], columns=["Positive", "Negative"])
+        plt.figure(figsize=(5,4))
+        sns.heatmap(cm_df, annot=True, fmt='g')
+        plt.title('Confusion Matrix')
+        plt.ylabel("Actual Value")
+        plt.xlabel("Predicted Value")
         
-        # ------- labeling
-        list_positive, list_negative = positiveOrNegativeDictionary()
-        result = df["Text_Clean_split"].apply(lambda text: utils.sentiment_analysis_lexicon_indonesia(text=text, list_positive=list_positive, list_negative=list_negative))
-        result = list(zip(*result))
-        df["polarity_score"] = result[0]
-        df["polarity"] = result[1]
-        df = df[df.polarity != "neutral"]
-        with labeling:
-            textAndPolarity = {
-                "TextClean": df['Text_Clean'],
-                "polarity": df["polarity"]
-            }
-            st.markdown("#### Daftar Library Positive & Negative")
-            col1, col2 = st.columns(2)
-            with col1:
-                st.dataframe({"Positive Dictionary": list_positive}, use_container_width=True)
-            with col2:
-                st.dataframe({"Negative Dictionary": list_negative}, use_container_width=True)
-
-            with st.expander("Show Data Labeling", expandData):
-                st.dataframe(pd.DataFrame(textAndPolarity).head(20), use_container_width=True)
-            
-            st.dataframe(pd.DataFrame([{
-                "Total Positive": len(result[2]),
-                "Total Negative": len(result[3])
-            }]), use_container_width=True)
+        TP = confusionMatrixData[0,0]
+        TN = confusionMatrixData[1,1]
+        FP = confusionMatrixData[1,0]
+        FN = confusionMatrixData[0,1]
+        resultAccuracy = (TN + TP) / (TP + TN + FP + FN)
         
-        # ------- Circle Diagram
-        with circleDiagram:
-            st.markdown("####  Sentiment count")
-            sentimentPolarity = df['polarity'].value_counts()
-            PdSentimentPolarity = pd.DataFrame({'Sentiment':sentimentPolarity.index,'Tweets':sentimentPolarity.values})
-            st.markdown(f"total keseluruhan ulasan yang sudah melewati tahap cleaning adalah sebanyak: **{sentimentPolarity['positive'] + sentimentPolarity['negative']}**")
-            fig = px.pie(PdSentimentPolarity, values='Tweets', names='Sentiment')
-            st.plotly_chart(fig)
-            st.markdown(f"Dari hasil perhitungan diketahui sentiment positive sebanyak **{sentimentPolarity['positive']}** dan sentiment negative sebanyak **{sentimentPolarity['negative']}**\n")
+        st.table({
+            "Result Predict": [TP,TN,FP,FN],
+            "Label": [
+                "True Positive", "True Negative", "False Positive", "False Negative"
+            ],
+            "alias": ["TP", "TN", "FP", "FN"]
+        })
+        rumusCol1, perhitunganCol2 = st.columns(2)
+        with rumusCol1:    
+            st.markdown("#### Rumus Accuracy")
+            st.latex(r'''
+                \frac{TP + TN}{TP + TN + FP + FN} = Accuracy
+            ''')
+        with perhitunganCol2:
+            st.markdown("#### Calculate Accuracy")
+            st.latex(r'''
+                \frac{%d + %d}{%d + %d + %d + %d} = %s
+            ''' % (TP, TN, TP, TN, FP, FN, resultAccuracy))
+
+        st.pyplot()
+
+    with classificationReport:
+        report = algorithm.classificationReport(y_test, y_pred)
+        data1 = []
+        lines = report.strip().split("\n")
+        header = lines[0].split(" ")
+        header = list(filter(bool, header))
+        header.insert(0," ")
+        data1.append(header)
+
+        for line in lines[1:]:
+            columns = line.strip().split(" ")
+            columns = list(filter(bool, columns)) 
             
-        # ----- TFIDF
-        df["Text_Clean_new"] = df["Text_Clean_split"].astype(str)
-        X, y = algorithm.tfidf(df=df)
-        rankingData = algorithm.calculate_tfidf_ranking(df)
-        hah = algorithm.hitung_kamus(df=df)
-        with tfidf:
-            st.markdown("####  TFIDF")
-            
-            ranking = pd.DataFrame(rankingData, columns=['Frequency', 'TF-IDF', 'Term'])
-            ranking.sort_values('Frequency', ascending=False, inplace=True)
-            st.dataframe(ranking)
+            if (len(columns) == 3):
+                columns.insert(1, " ")
+                columns.insert(2, " ")
+            if(len(columns) != 0):
+                if (not utils.isfloat(columns[1]) and columns[1] != " "):
+                    columns[0] += " " + columns[1]
+                    columns.pop(1) 
+                data1.append(columns)
+        
+        st.dataframe(pd.DataFrame(data1[1:], columns=data1[0]), use_container_width=True)
 
-            # Membuat DataFrame dari kamus
-            df_kamus = pd.DataFrame.from_dict(hah, orient='index')
-            df_kamus.index.name = 'Kata'
-            st.dataframe(df_kamus)
-
-            st.text(X[0:2])
-
-        with wordCloud:
-            st.markdown("#### Wordcloud")
-
-        X_train, X_test, y_train, y_test, data_latih, data_test, all_data = algorithm.train_test_splitTFIDF(X=X, y=y, testSize = 0.1, randState = 0)
-        with trainAndTest:
-            st.dataframe(pd.DataFrame({
-                "Total Keseluruhan data": [all_data],
-                "Total Data Latih": [data_latih],
-                "Total Data Test": [data_test]
-            }).reset_index(drop=True), use_container_width=True)
-
-        score_svmlk, svmLinear, y_pred = algorithm.predictSVM(X_train, y_train, X_test, y_test)
-        with SVMModel:
-            st.markdown(f"<center>Akurasi dengan menggunakan Support Vector Machine Linear Kernel: <b color='white'>{score_svmlk:.0%}</b></center>", unsafe_allow_html=True)
-            # st.pyplot()
-
-        with confusionMatrix:
-            accuracy, confusionMatrixData = algorithm.plot_confusion_matrix_box(svmLinear=svmLinear, X_test=X_test, y_test=y_test, y_pred=y_pred)
-            cm_df = pd.DataFrame(confusionMatrixData, index=["Positive", "Negative"], columns=["Positive", "Negative"])
-            plt.figure(figsize=(5,4))
-            sns.heatmap(cm_df, annot=True, fmt='g')
-            plt.title('Confusion Matrix')
-            plt.ylabel("Actual Value")
-            plt.xlabel("Predicted Value")
-            
-            TP = confusionMatrixData[0,0]
-            TN = confusionMatrixData[1,1]
-            FP = confusionMatrixData[1,0]
-            FN = confusionMatrixData[0,1]
-            resultAccuracy = (TN + TP) / (TP + TN + FP + FN)
-            
-            st.table({
-                "Result Predict": [TP,TN,FP,FN],
-                "Label": [
-                    "True Positive", "True Negative", "False Positive", "False Negative"
-                ],
-                "alias": ["TP", "TN", "FP", "FN"]
-            })
-            rumusCol1, perhitunganCol2 = st.columns(2)
-            with rumusCol1:    
-                st.markdown("#### Rumus Accuracy")
-                st.latex(r'''
-                    \frac{TP + TN}{TP + TN + FP + FN} = Accuracy
-                ''')
-            with perhitunganCol2:
-                st.markdown("#### Calculate Accuracy")
-                st.latex(r'''
-                    \frac{%d + %d}{%d + %d + %d + %d} = %s
-                ''' % (TP, TN, TP, TN, FP, FN, resultAccuracy))
-
-            st.pyplot()
-
-        with classificationReport:
-            report = algorithm.classificationReport(y_test, y_pred)
-            data1 = []
-            lines = report.strip().split("\n")
-            header = lines[0].split(" ")
-            header = list(filter(bool, header))
-            header.insert(0," ")
-            data1.append(header)
-
-            for line in lines[1:]:
-                columns = line.strip().split(" ")
-                columns = list(filter(bool, columns)) 
-                
-                if (len(columns) == 3):
-                    columns.insert(1, " ")
-                    columns.insert(2, " ")
-                if(len(columns) != 0):
-                    if (not utils.isfloat(columns[1]) and columns[1] != " "):
-                        columns[0] += " " + columns[1]
-                        columns.pop(1) 
-                    data1.append(columns)
-            
-            st.dataframe(pd.DataFrame(data1[1:], columns=data1[0]), use_container_width=True)
-
-    if selected == "facebook":
-        st.markdown("## Facebook")
         # df, result = sentimentAnalysis(df, False)
         # df, df_positive, df_negative, total_freq_by_month = countTotalSentimentFrequency(df, result)
 
@@ -310,6 +315,9 @@ def complaint():
                 st.markdown(f"##### :red[{username}]")
             st.markdown(message['content'])
 
+    with st.chat_message("assistant"):
+            st.markdown(f"Halo {username}👋,\nApakah ada yang bisa saya bantu ?")
+
     if prompt := st.chat_input("Whats is up ?"):
         with st.chat_message("user"):
             st.markdown(f"##### :red[{username}]")
@@ -318,7 +326,8 @@ def complaint():
             "role": "user",
             "content": prompt
         })
-        response = f"echo: {prompt}"
+
+        response = f"Ticket aduan anda: {random.getrandbits(15)}\n harap tunggu response dari admin ....."
         with st.chat_message("assistant"):
             st.markdown(response)
         st.session_state.messages.append({
