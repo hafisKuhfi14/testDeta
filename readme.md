@@ -35,3 +35,6 @@ password = abc123
 
 ## Straemlit-chat
 https://pypi.org/project/streamlit-chat/
+
+# Generate requirements.txt
+pipreqs --encoding utf-8 "./"
