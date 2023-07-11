@@ -1,6 +1,7 @@
 import pandas as pd
 from collections import Counter
-from ..utils import utils
+from ..modules import txt_preprocessing
+from ..modules import feature_extraction
 
 def textCleaning(df, neutral = False):
     """TextCleaning
@@ -18,27 +19,27 @@ def textCleaning(df, neutral = False):
     ```
     """
     # ------- CaseFolding
-    df["Text_Clean"] = df["responding"].apply(utils.Case_Folding)
+    df["Text_Clean"] = df["responding"].apply(txt_preprocessing.Case_Folding)
     # ------- Cleansing
-    df["Text_Clean"] = df["Text_Clean"].apply(utils.Cleansing)
+    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.Cleansing)
     # ------- Lemmatisasi
-    df["Text_Clean"] = df["Text_Clean"].apply(utils.lemmatisasi().lemmatize)
+    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.lemmatisasi().lemmatize)
     # ------- Steaming
-    df["Text_Clean"] = df["Text_Clean"].apply(utils.stemming().stem)
+    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.stemming().stem)
 
     # ------- Slangword Standrization
     slang_dictionary = pd.read_csv("https://raw.githubusercontent.com/insomniagung/kamus_kbba/main/kbba.txt", delimiter="\t", names=['slang', 'formal'], header=None, encoding='utf-8')
     slang_dict = pd.Series(slang_dictionary["formal"].values, index = slang_dictionary["slang"]).to_dict()
-    df["Text_Clean"] = df["Text_Clean"].apply(lambda text: utils.Slangwords(text, slang_dict))
+    df["Text_Clean"] = df["Text_Clean"].apply(lambda text: txt_preprocessing.Slangwords(text, slang_dict))
     df["Text_Clean"] = df["Text_Clean"].str.replace("mhs", "mahasiswa")
     # ------- Stopword Removal
-    df["Text_Clean"] = df["Text_Clean"].apply(utils.stopwordRemoval().remove_stopword)
+    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.stopwordRemoval().remove_stopword)
     # ------- Unwanted Word Removal
-    df["Text_Clean"] = df["Text_Clean"].apply(utils.RemoveUnwantedWords)
+    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.RemoveUnwantedWords)
     ## Menghapus kata yang kurang dari 3 huruf
     df["Text_Clean"] = df["Text_Clean"].str.findall('\w{3,}').str.join(' ')
     # ------- SplitWord    
-    df["Text_Clean_split"] = df["Text_Clean"].apply(utils.split_word)
+    df["Text_Clean_split"] = df["Text_Clean"].apply(feature_extraction.split_word)
     
     ## Memberi label pada data ulasan
     ### Pada dataset belum terdapat label positif dan negatif pada ulasan, sehingga perlu dilakukan pelabelan.
@@ -70,7 +71,9 @@ def sentimentAnalysis(df, neutral):
     `result[2] as positive and result[3] as negative`
     """
     list_positive, list_negative = positiveOrNegativeDictionary()
-    result = df["Text_Clean_split"].apply(lambda text: utils.sentiment_analysis_lexicon_indonesia(text=text, list_positive=list_positive, list_negative=list_negative))
+    result = df["Text_Clean_split"].apply(lambda text: txt_preprocessing.lexicon_indonesia(
+        text=text, list_positive=list_positive, list_negative=list_negative
+    ))
     result = list(zip(*result))
     df["polarity_score"] = result[0]
     df["polarity"] = result[1]

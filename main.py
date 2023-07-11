@@ -8,14 +8,15 @@ from streamlit_option_menu import option_menu  # pip install streamlit-option-me
 import streamlit.components.v1 as components
 import streamlit_authenticator as stauth  # pip install streamlit-authenticator
 
-import pandas as pd
-import plotly.express as px
 import app.db.database as db  # local import
-import ast
-from app import page
+from app.views.complaint import complaint
+from app.views.home import home
+from app.views.register import register_user
+from app.views.text_predictor import text_predictor
+from app.views.file_predictor import file_predictor
+from app.views.report import report
+from app.views.profile import profile
 
-incomes = ["Salary", "Blog", "Other Income"]
-expenses = ["Rent", "Utilities", "Groceries", "Car", "Other Expenses", "Saving"]
 currency = "USD"
 page_title = "Sentimen Analisis Ulasan Pelanggan IndiHome"
 page_icon = ":money_with_wings:"  # emojis: https://www.webfx.com/tools/emoji-cheat-sheet/
@@ -43,6 +44,44 @@ authenticator = stauth.Authenticate(credentials, "app_home", "auth", cookie_expi
 # name, authentication_status, username = authenticator.login("Login", "main")
 # print(authenticator.credentials)
 
+def sidebar_menu(pages, nameData):
+    with st.sidebar:
+        st.markdown(f'# Selamat Datang {nameData}')
+        selectedNavigationSidebar = option_menu(
+            menu_title=None,
+            options=pages,
+            icons=["house", "chat", "fonts", "folder", "book","person"],
+            menu_icon="cast",
+            default_index=0,
+        )
+        authenticator.logout("Logout", "main")
+
+    if selectedNavigationSidebar == "Home": 
+        # The main window
+        asyncio.run(home())
+        
+    if selectedNavigationSidebar == "Projects":
+        st.title("Projects Page")
+        # The main window
+
+    if selectedNavigationSidebar == "Keluhan":
+        complaint()
+
+    if selectedNavigationSidebar == "logout":
+        authenticator.logout("Logout", "main")
+
+    if selectedNavigationSidebar == "Text Predictor":
+        asyncio.run(text_predictor())
+
+    if selectedNavigationSidebar == "File Predictor":
+        file_predictor()
+
+    if selectedNavigationSidebar == "Laporan":
+        report()
+
+    if selectedNavigationSidebar == "Account Management":
+        profile()
+
 authenticator._check_cookie()
 if not st.session_state['authentication_status']:  
     selected = option_menu(
@@ -58,7 +97,7 @@ if not st.session_state['authentication_status']:
         if authentication_status == None:
             st.warning("Please enter your username and password")
     if selected == "Register":
-        page.register_user("Register User", 'main', preauthorization=False)
+        register_user("Register User", 'main', preauthorization=False)
 else:
     # -------------- SETTINGS --------------
     selected = None
@@ -76,6 +115,7 @@ else:
                 #MainMenu {visibility: hidden;}
                 .css-1544g2n.e1fqkh3o4 {padding: 3rem 1rem 1.5rem}
                 .css-z3au9t.egzxvld2 {visibility: hidden;}  
+                button[aria-selected='true'] {color: #ff0061; background-color:#272727; padding:10px}
                 </style>
                 """
     st.markdown(hide_st_style, unsafe_allow_html=True)
@@ -83,33 +123,12 @@ else:
     # Code to import libraries and get the data goes here
 
     # The side bar that contains radio buttons for selection of charts
-    with st.sidebar:
-        st.markdown(f'# Selamat Datang {name}')
-        selectedNavigationSidebar = option_menu(
-            menu_title=None,
-            options=["Home", "Projects", "Keluhan", "Text Predictor"],
-            icons=["house", "book", "chat", "fonts"],
-            menu_icon="cast",
-            default_index=0,
-        )
-        authenticator.logout("Logout", "main")
+    print("===============")
+    if (st.session_state['username'] == "admin"):
+        sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], name)
+    else:
+        sidebar_menu(["Home", "Keluhan", "Text Predictor", "Account Management"], name)
 
-    if selectedNavigationSidebar == "Home": 
-        # The main window
-        asyncio.run(page.home())
-        
-    if selectedNavigationSidebar == "Projects":
-        st.title("Projects Page")
-        # The main window
-
-    if selectedNavigationSidebar == "Keluhan":
-        page.complaint()
-
-    if selectedNavigationSidebar == "logout":
-        authenticator.logout("Logout", "main")
-
-    if selectedNavigationSidebar == "Text Predictor":
-        asyncio.run(page.text_predictor())
 
 # async def main():
 #     users = db.fetch_all_users()
