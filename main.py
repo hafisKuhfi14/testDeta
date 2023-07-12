@@ -66,14 +66,16 @@ def sidebar_menu(pages, authenticator,nameData):
 def main():
     # --- USER AUTHENTICATION ---
     # my class function which makes a call to a database and returns a list of lists (nested list), of usernames, names, and passwords
+    
+    # Delete all the items in Session state
+    for key in st.session_state.keys():
+        del st.session_state[key]
     users = db.fetch_all_users()
     # the code mentioned above
     usernames = [user['key'] for user in users]
     names = [user['name'] for user in users]
     passwords = [user['password'] for user in users]
-    username = ""
-    st.write("============= before")
-    st.write(st.session_state.to_dict())
+    username = "" 
     credentials = {"usernames":{}}
 
     for un, name, pw in zip(usernames, names, passwords):
@@ -81,8 +83,6 @@ def main():
         credentials["usernames"].update({un:user_dict})
 
     authenticator = stauth.Authenticate(credentials, "app_home", "auth", cookie_expiry_days=30)
-    st.write("============= after")
-    st.write(st.session_state.to_dict())
     # name, authentication_status, username = authenticator.login("Login", "main")
     # print(authenticator.credentials)
     
