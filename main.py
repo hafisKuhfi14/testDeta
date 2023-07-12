@@ -68,8 +68,6 @@ def main():
     # my class function which makes a call to a database and returns a list of lists (nested list), of usernames, names, and passwords
     
     # Delete all the items in Session state
-    for key in st.session_state.keys():
-        del st.session_state[key]
     users = db.fetch_all_users()
     # the code mentioned above
     usernames = [user['key'] for user in users]
