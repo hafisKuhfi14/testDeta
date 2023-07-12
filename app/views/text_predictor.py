@@ -36,7 +36,7 @@ async def text_predictor():
             st.error("Ulasan tersebut bernada negative 😡")
         else:
             st.success("Ulasan tersebut bernada positive 😊")
-
+        textPolarity["positive"] += textPolarity["neutral"]
         st.write("Sentimen Per-kata suatu ulasan")
         # Temukan panjang maksimum dari array dalam dictionary
         max_length = max(len(textPolarity[key]) for key in textPolarity) 
