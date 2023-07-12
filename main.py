@@ -25,26 +25,7 @@ layout = "centered"
 
 st.set_page_config(page_title=page_title, page_icon=page_icon, layout=layout)
 
-# --- USER AUTHENTICATION ---
-# my class function which makes a call to a database and returns a list of lists (nested list), of usernames, names, and passwords
-users = db.fetch_all_users()
-# the code mentioned above
-usernames = [user['key'] for user in users]
-names = [user['name'] for user in users]
-passwords = [user['password'] for user in users]
-username = ""
-
-credentials = {"usernames":{}}
-
-for un, name, pw in zip(usernames, names, passwords):
-    user_dict = {"name":name,"password":pw}
-    credentials["usernames"].update({un:user_dict})
-
-authenticator = stauth.Authenticate(credentials, "app_home", "auth", cookie_expiry_days=30)
-# name, authentication_status, username = authenticator.login("Login", "main")
-# print(authenticator.credentials)
-
-def sidebar_menu(pages, nameData):
+def sidebar_menu(pages, authenticator,nameData):
     with st.sidebar:
         st.markdown(f'# Selamat Datang {nameData}')
         selectedNavigationSidebar = option_menu(
@@ -82,62 +63,72 @@ def sidebar_menu(pages, nameData):
     if selectedNavigationSidebar == "Account Management":
         profile()
 
-authenticator._check_cookie()
-if not st.session_state['authentication_status']:  
-    selected = option_menu(
-        menu_title=None,
-        options=["Login", "Register"],
-        icons=["login", "register"],  # https://icons.getbootstrap.com/
-        orientation="horizontal",
-    )
-    if selected == "Login":
-        name, authentication_status, username = authenticator.login("Login", "main")
-        if authentication_status == False:
-            st.error("Username/password is incorrect")
-        if authentication_status == None:
-            st.warning("Please enter your username and password")
-    if selected == "Register":
-        register_user("Register User", 'main', preauthorization=False)
-else:
-    # -------------- SETTINGS --------------
-    selected = None
+def main():
+    # --- USER AUTHENTICATION ---
+    # my class function which makes a call to a database and returns a list of lists (nested list), of usernames, names, and passwords
+    users = db.fetch_all_users()
+    # the code mentioned above
+    usernames = [user['key'] for user in users]
+    names = [user['name'] for user in users]
+    passwords = [user['password'] for user in users]
+    username = ""
 
-    st.markdown("## Sentimen Analisis Ulasan Pelanggan IndiHome di PT.Telkom Indonesia 💹")
-    components.html("""<hr style="height:2px;border:none;color:#333;background-color:white;margin-bottom: 1px"/>""", height=50)
+    credentials = {"usernames":{}}
 
-    # --- DROP DOWN VALUES FOR SELECTING THE PERIOD ---
-    years = [datetime.today().year, datetime.today().year + 1]
-    months = list(calendar.month_name[1:])
+    for un, name, pw in zip(usernames, names, passwords):
+        user_dict = {"name":name,"password":pw}
+        credentials["usernames"].update({un:user_dict})
 
-    # --- HIDE STREAMLIT STYLE ---
-    hide_st_style = """
-                <style>
-                #MainMenu {visibility: hidden;}
-                .css-1544g2n.e1fqkh3o4 {padding: 3rem 1rem 1.5rem}
-                .css-z3au9t.egzxvld2 {visibility: hidden;}  
-                button[aria-selected='true'] {color: #ff0061; background-color:#272727; padding:10px}
-                </style>
-                """
-    st.markdown(hide_st_style, unsafe_allow_html=True)
-
-    # Code to import libraries and get the data goes here
-
-    # The side bar that contains radio buttons for selection of charts
-    print("===============")
-    if (st.session_state['username'] == "admin"):
-        sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], name)
+    authenticator = stauth.Authenticate(credentials, "app_home", "auth", cookie_expiry_days=30)
+    # name, authentication_status, username = authenticator.login("Login", "main")
+    # print(authenticator.credentials)
+    
+    authenticator._check_cookie()
+    if not st.session_state['authentication_status']:  
+        selected = option_menu(
+            menu_title=None,
+            options=["Login", "Register"],
+            icons=["login", "register"],  # https://icons.getbootstrap.com/
+            orientation="horizontal",
+        )
+        if selected == "Login":
+            name, authentication_status, username = authenticator.login("Login", "main")
+            if authentication_status == False:
+                st.error("Username/password is incorrect")
+            if authentication_status == None:
+                st.warning("Please enter your username and password")
+        if selected == "Register":
+            register_user("Register User", 'main', preauthorization=False)
     else:
-        sidebar_menu(["Home", "Keluhan", "Text Predictor", "Account Management"], name)
+        # -------------- SETTINGS --------------
+        selected = None
 
+        st.markdown("## Sentimen Analisis Ulasan Pelanggan IndiHome di PT.Telkom Indonesia 💹")
+        components.html("""<hr style="height:2px;border:none;color:#333;background-color:white;margin-bottom: 1px"/>""", height=50)
 
-# async def main():
-#     users = db.fetch_all_users()
-#     usernames = [user['key'] for user in users]
-#     names = [user['name'] for user in users]
-#     passwords = [user['password'] for user in users]
-#     print(names)
-#     username = ""
-#     credentials = {"usernames":{}}
+        # --- DROP DOWN VALUES FOR SELECTING THE PERIOD ---
+        years = [datetime.today().year, datetime.today().year + 1]
+        months = list(calendar.month_name[1:])
 
-# if __name__ == "__main__":
-#     asyncio.run(main())
+        # --- HIDE STREAMLIT STYLE ---
+        hide_st_style = """
+                    <style>
+                    #MainMenu {visibility: hidden;}
+                    .css-1544g2n.e1fqkh3o4 {padding: 3rem 1rem 1.5rem}
+                    .css-z3au9t.egzxvld2 {visibility: hidden;}  
+                    button[aria-selected='true'] {color: #ff0061; background-color:#272727; padding:10px}
+                    </style>
+                    """
+        st.markdown(hide_st_style, unsafe_allow_html=True)
+
+        # Code to import libraries and get the data goes here
+
+        # The side bar that contains radio buttons for selection of charts
+        print("===============")
+        if (st.session_state['username'] == "admin"):
+            sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator,name)
+        else:
+            sidebar_menu(["Home", "Keluhan", "Text Predictor", "Account Management"], authenticator, name)
+
+if __name__ == "__main__":
+    main()
