@@ -66,7 +66,7 @@ def sidebar_menu(pages, authenticator,nameData):
 def main():
     # --- USER AUTHENTICATION ---
     # my class function which makes a call to a database and returns a list of lists (nested list), of usernames, names, and passwords
-    users = db.fetch_all_users()
+    users = asyncio.run(db.fetch_all_users())
     # the code mentioned above
     usernames = [user['key'] for user in users]
     names = [user['name'] for user in users]
