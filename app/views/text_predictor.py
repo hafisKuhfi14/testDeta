@@ -20,19 +20,23 @@ async def text_predictor():
         svm, tfidf = pickle.load(pickle_in)
         text_predictor, _ = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=True)
 
-        textPolarity = { "positive": [], "negative": []}
+        textPolarity = { "positive": [], "negative": [], "neutral": []}
         for text in text_predictor['Text_Clean_split'][0]:
             y_pred, _ = model.predictFromPKL(tfidf, svm, [text]) 
             if (y_pred[0] == "negative"):
                 textPolarity['negative'].append(text)
             if (y_pred[0] == "positive"):
                 textPolarity['positive'].append(text)
+            if (y_pred[0] == "neutral"):
+                textPolarity['neutral'].append(text)
 
-        if (len(textPolarity['positive']) > len(textPolarity['negative']) 
-            or len(textPolarity["positive"]) == 0 or len(textPolarity["negative"]) == 0):
+        if (len(textPolarity['positive']) > len(textPolarity['negative'])):
             st.success("Ulasan tersebut bernada positive 😊")
-        else:
+        elif(len(textPolarity['positive']) < len(textPolarity['negative'])):
             st.error("Ulasan tersebut bernada negative 😡")
+        else:
+            st.success("Ulasan tersebut bernada positive 😊")
+
         st.write("Sentimen Per-kata suatu ulasan")
         # Temukan panjang maksimum dari array dalam dictionary
         max_length = max(len(textPolarity[key]) for key in textPolarity) 
