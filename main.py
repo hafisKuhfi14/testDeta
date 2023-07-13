@@ -63,12 +63,17 @@ def sidebar_menu(pages, authenticator,nameData):
     if selectedNavigationSidebar == "Account Management":
         profile()
 
+def fetch_all_users():
+    """Returns a dict of all users"""
+    res = db.dbUser.fetch()
+    return res.items
+
 def main():
     # --- USER AUTHENTICATION ---
     # my class function which makes a call to a database and returns a list of lists (nested list), of usernames, names, and passwords
     
     # Delete all the items in Session state
-    users = db.fetch_all_users()
+    users = fetch_all_users()
     # the code mentioned above
     usernames = [user['key'] for user in users]
     names = [user['name'] for user in users]
