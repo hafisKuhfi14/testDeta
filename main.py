@@ -1,3 +1,4 @@
+import app.db.database as db  # local import
 import calendar  # Core Python Module
 from datetime import datetime  # Core Python Module
 import asyncio
@@ -8,7 +9,6 @@ from streamlit_option_menu import option_menu  # pip install streamlit-option-me
 import streamlit.components.v1 as components
 import streamlit_authenticator as stauth  # pip install streamlit-authenticator
 
-import app.db.database as db  # local import
 from app.views.complaint import complaint
 from app.views.home import home
 from app.views.register import register_user
