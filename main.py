@@ -16,6 +16,7 @@ from app.views.text_predictor import text_predictor
 from app.views.file_predictor import file_predictor
 from app.views.report import report
 from app.views.profile import profile
+from deta import Deta  # pip install deta
 
 currency = "USD"
 page_title = "Sentimen Analisis Ulasan Pelanggan IndiHome"
@@ -65,7 +66,11 @@ def sidebar_menu(pages, authenticator,nameData):
 
 def fetch_all_users():
     """Returns a dict of all users"""
-    res = db.dbUser.fetch()
+    deta = Deta(DETA_KEY)
+    DETA_KEY = st.secrets["data_key"]
+
+    dbUser = deta.Base("users")
+    res = dbUser.fetch()
     return res.items
 
 def main():
@@ -73,7 +78,6 @@ def main():
     # my class function which makes a call to a database and returns a list of lists (nested list), of usernames, names, and passwords
     
     # Delete all the items in Session state
-    print("=========masuk MAIN")
     users = fetch_all_users()
     # the code mentioned above
     usernames = [user['key'] for user in users]
