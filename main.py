@@ -35,6 +35,7 @@ def sidebar_menu(pages, authenticator,nameData):
             menu_icon="cast",
             default_index=0,
         )
+        authenticator.logout("Logout", "main")
 
     if selectedNavigationSidebar == "Home": 
         # The main window
@@ -46,9 +47,6 @@ def sidebar_menu(pages, authenticator,nameData):
 
     if selectedNavigationSidebar == "Keluhan":
         complaint()
-
-    if selectedNavigationSidebar == "logout":
-        authenticator.logout("Logout", "main")
 
     if selectedNavigationSidebar == "Text Predictor":
         asyncio.run(text_predictor())
