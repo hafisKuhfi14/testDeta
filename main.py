@@ -66,8 +66,8 @@ def sidebar_menu(pages, authenticator,nameData):
 
 def fetch_all_users():
     """Returns a dict of all users"""
-    deta = Deta(DETA_KEY)
     DETA_KEY = st.secrets["data_key"]
+    deta = Deta(DETA_KEY)
 
     dbUser = deta.Base("users")
     res = dbUser.fetch()
