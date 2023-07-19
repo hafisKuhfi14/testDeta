@@ -20,7 +20,7 @@ def to_excel(df):
 def report():
     st.markdown("## Laporan") 
     start_date_col, end_date_col = st.columns(2)   
-    df = pd.read_csv("app/data/indihome3_scrape.csv")
+    df = pd.read_csv("app/data/indihome3_twitterscrape.csv")
 
     with start_date_col:
         start_date = st.date_input(

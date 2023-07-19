@@ -20,7 +20,7 @@ async def home():
         
         # --- INPUT & SAVE PERIODS ---
         if (selected == "Twitter"):
-            df = pd.read_csv("app/data/indihome3_scrape.csv")
+            df = pd.read_csv("app/data/indihome3_twitterscrape.csv")
             
         if (selected == "Facebook"):
             df = pd.read_csv("app/data/indihome3_facebookscrape.csv")

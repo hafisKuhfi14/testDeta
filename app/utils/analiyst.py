@@ -70,7 +70,7 @@ def analiystThisData(st, df, selectedColumn = "responding"):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
 
         # ------- Slangword Standrization   
-        slang_dictionary = pd.read_csv("https://raw.githubusercontent.com/insomniagung/kamus_kbba/main/kbba.txt", delimiter="\t", names=['slang', 'formal'], header=None, encoding='utf-8')
+        slang_dictionary = pd.read_csv("https://raw.githubusercontent.com/dhino12/kamus_kbba/main/kbba.txt", delimiter="\t", names=['slang', 'formal'], header=None, encoding='utf-8')
         slang_dict = pd.Series(slang_dictionary["formal"].values, index = slang_dictionary["slang"]).to_dict()
         df["Text_Clean"] = df["Text_Clean"].apply(lambda text: txt_preprocessing.Slangwords(text, slang_dict))
         df["Text_Clean"] = df["Text_Clean"].str.replace("mhs", "mahasiswa")        

@@ -49,11 +49,11 @@ def textCleaning(df, neutral = False):
 
 def positiveOrNegativeDictionary():
     ## Daftar kosa kata positif Bahasa Indonesia
-    df_positive = pd.read_csv("https://raw.githubusercontent.com/masdevid/ID-OpinionWords/master/positive.txt", sep="\t")
+    df_positive = pd.read_csv("https://raw.githubusercontent.com/dhino12/ID-NegPos/main/positive.txt", sep="\t")
     list_positive = list(df_positive.iloc[::, 0])
 
     ## Daftar kosa kata negatif Bahasa Indonesia
-    df_negative = pd.read_csv("https://raw.githubusercontent.com/masdevid/ID-OpinionWords/master/negative.txt", sep="\t")
+    df_negative = pd.read_csv("https://raw.githubusercontent.com/dhino12/ID-NegPos/main/negative.txt", sep="\t")
     list_negative = list(df_negative.iloc[::, 0]) 
     return list_positive, list_negative
 
