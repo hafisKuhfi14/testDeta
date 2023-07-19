@@ -10,10 +10,12 @@ from ..utils.textCleaning import positiveOrNegativeDictionary
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
+import streamlit as streamlitdata  # pip install streamlit
 
 # Error Handling
 import traceback
 
+@streamlitdata.cache_data
 def analiystThisData(st, df, selectedColumn = "responding"):
     try:   
         # Menampilkan DataFrame
