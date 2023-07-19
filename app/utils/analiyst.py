@@ -15,7 +15,7 @@ import streamlit as streamlitdata  # pip install streamlit
 # Error Handling
 import traceback
 
-@streamlitdata.cache_data
+@streamlitdata.cache_data(experimental_allow_widgets=True)
 def analiystThisData(st, df, selectedColumn = "responding"):
     try:   
         # Menampilkan DataFrame
