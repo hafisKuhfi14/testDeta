@@ -11,26 +11,30 @@ deta = Deta(DETA_KEY)
 # This is how to create/connect a database
 db = deta.Base("monthly_reports")
 
-dbUser = deta.Base("users")
-
-
 def fetch_all_users():
     """Returns a dict of all users"""
+    dbUser = deta.Base("users")
     res = dbUser.fetch()
     return res.items
 
 def insert_user(username, name, password):
     """Returns the user on a successful user creation, otherwise raises and error"""
+    dbUser = deta.Base("users")
+
     return dbUser.put({"key": username, "name": name, "password": password})
 
 def update_user(data, username):
+    dbUser = deta.Base("users")
+
     return dbUser.update(data, key=username)
 
 def get_username(username):
     """If not found, the function will return None"""
+    dbUser = deta.Base("users")
     return dbUser.get(username)
 
 def delete_user(username):
+    dbUser = deta.Base("users")
     return dbUser.delete(username)
 
 def insert_complaint(name, complaint):
