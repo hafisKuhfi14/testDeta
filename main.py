@@ -48,6 +48,9 @@ def sidebar_menu(pages, authenticator,nameData):
     if selectedNavigationSidebar == "Keluhan":
         complaint()
 
+    if selectedNavigationSidebar == "logout":
+        authenticator.logout("Logout", "main")
+
     if selectedNavigationSidebar == "Text Predictor":
         asyncio.run(text_predictor())
 
