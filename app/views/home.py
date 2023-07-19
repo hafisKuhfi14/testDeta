@@ -5,6 +5,7 @@ from ..utils.analiyst import analiystThisData
 # Error Handling
 import traceback
 
+@st.cache_data
 async def home():
     try:
 

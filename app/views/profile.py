@@ -33,7 +33,8 @@ def profile():
             if (st.button("Delete") and st.session_state['username'] != selected_tab):
                 user = db.delete_user(selected_tab)
                 st.success(f"Success Delete {selected_tab}")
-            else:
+                st.experimental_rerun()
+            if (selected_tab == st.session_state['username']):
                 st.warning("Ooops tidak dapat menghapus diri sendiri")
 
 def form_update(username):
