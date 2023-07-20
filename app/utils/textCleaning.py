@@ -2,6 +2,8 @@ import pandas as pd
 from collections import Counter
 from ..modules import txt_preprocessing
 from ..modules import feature_extraction
+import calendar
+
 
 def textCleaning(df, neutral = False):
     """TextCleaning
@@ -87,6 +89,7 @@ def countTotalSentimentFrequency(df, result):
     """Counting total sentiment positive & negative based on topik popular as frequency"""
 
     df["month"] = pd.DatetimeIndex(df["postDate"]).month
+
     # Menggabungkan semua list kata positif dan negatif menjadi satu list
     all_positive_words = [word for sublist in result[2] for word in sublist]
     all_negative_words = [word for sublist in result[3] for word in sublist]
@@ -100,7 +103,5 @@ def countTotalSentimentFrequency(df, result):
 
     # Membentuk pivot table untuk mendapatkan total frekuensi berdasarkan bulan
     total_freq_by_month = freq_by_month.pivot_table(index="month", columns="polarity", values="frequency", aggfunc="sum", fill_value=0).reset_index()
-
-    print(total_freq_by_month)
-
+    
     return df, positive_df, negative_df, total_freq_by_month

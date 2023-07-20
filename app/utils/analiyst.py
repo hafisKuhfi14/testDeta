@@ -5,17 +5,19 @@ from ..modules import feature_extraction
 from ..modules import model
 from ..modules import evaluation
 from ..modules import txt_preprocessing
-from ..utils.textCleaning import positiveOrNegativeDictionary
+from ..utils.textCleaning import positiveOrNegativeDictionary, countTotalSentimentFrequency
 
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as streamlitdata  # pip install streamlit
+import calendar
+from wordcloud import WordCloud
 
 # Error Handling
 import traceback
 
-@streamlitdata.cache_data(experimental_allow_widgets=True)
+# @streamlitdata.cache_data(experimental_allow_widgets=True)
 def analiystThisData(st, df, selectedColumn = "responding"):
     try:   
         # Menampilkan DataFrame
@@ -34,7 +36,10 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         resultWordRemoval, stopwordRemoval, unwantedRemoval, shortWord = st.tabs(["Hasil Word Removal", "Stopword Removal", "Unwanted Word", "ShortWord"])
 
         st.markdown("### Tokenizing")
-        splitWords, labeling, circleDiagram, wordCloud, tfidf = st.tabs(["Split Words", "Labeling", "Circle Diagram", "WordCloud", "TF-IDF"])
+        splitWords, labeling, tfidf = st.tabs(["Split Words", "Labeling", "TF-IDF"])
+
+        st.markdown("### Visualisasi Data")
+        garis, topwords, wordCloud, circleDiagram = st.tabs(["garis", "topwords", "WordCloud", "Circle Diagram"])
 
         st.markdown("### Modeling")
         SVMModel, trainAndTest, naive_bayes = st.tabs(["Support Vector Machine", "Train & Test Data", "Naïve Bayes"])
@@ -144,16 +149,6 @@ def analiystThisData(st, df, selectedColumn = "responding"):
                 len(df[df.polarity == 'positive']), len(df[df.polarity == 'negative']), len(df)
             ], index=['Total Positive', 'Total Negative', 'Total Polarity']), use_container_width=True)
         
-        # ------- Circle Diagram
-        with circleDiagram:
-            st.markdown("####  Sentiment count")
-            sentimentPolarity = df['polarity'].value_counts()
-            PdSentimentPolarity = pd.DataFrame({'Sentiment':sentimentPolarity.index,'Tweets':sentimentPolarity.values})
-            st.markdown(f"total keseluruhan ulasan yang sudah melewati tahap cleaning adalah sebanyak: **{sentimentPolarity['positive'] + sentimentPolarity['negative']}**")
-            fig = px.pie(PdSentimentPolarity, values='Tweets', names='Sentiment')
-            st.plotly_chart(fig)
-            st.markdown(f"Dari hasil perhitungan diketahui sentiment positive sebanyak **{sentimentPolarity['positive']}** dan sentiment negative sebanyak **{sentimentPolarity['negative']}**\n")
-            
         # ----- TFIDF
         df["Text_Clean_new"] = df["Text_Clean_split"].astype(str)
         X, y = feature_extraction.tfidf(df=df)
@@ -173,8 +168,52 @@ def analiystThisData(st, df, selectedColumn = "responding"):
 
             st.text(X[0:2])
 
+        _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
+        # ------- Circle Diagram
+        with circleDiagram:
+            st.markdown("####  Sentiment count")
+            sentimentPolarity = df['polarity'].value_counts()
+            PdSentimentPolarity = pd.DataFrame({'Sentiment':sentimentPolarity.index,'Tweets':sentimentPolarity.values})
+            st.markdown(f"total keseluruhan ulasan yang sudah melewati tahap cleaning adalah sebanyak: **{sentimentPolarity['positive'] + sentimentPolarity['negative']}**")
+            fig = px.pie(PdSentimentPolarity, values='Tweets', names='Sentiment')
+            st.plotly_chart(fig)
+            st.markdown(f"Dari hasil perhitungan diketahui sentiment positive sebanyak **{sentimentPolarity['positive']}** dan sentiment negative sebanyak **{sentimentPolarity['negative']}**\n")
+            
         with wordCloud:
             st.markdown("#### Wordcloud")
+            df_positive = df[df["polarity"] == "positive"]
+            df_negative = df[df["polarity"] == "negative"]
+            text_positive = ' '.join(df_positive['Text_Clean'])
+            text_negative = ' '.join(df_negative['Text_Clean'])
+
+            wordcloud_positive = WordCloud(width=800, height=800, background_color='white', colormap='Greens').generate(text_positive)
+            wordcloud_negative = WordCloud(width=800, height=800, background_color='white', colormap='Reds').generate(text_negative)
+
+            fig, axs = plt.subplots(1, 2, figsize=(8, 3))
+            axs[0].imshow(wordcloud_positive, interpolation='bilinear')
+            axs[0].set_title('Positive Words')
+            axs[0].axis('off')
+
+            axs[1].imshow(wordcloud_negative, interpolation='bilinear')
+            axs[1].set_title('Negative Words')
+            axs[1].axis('off')
+
+            plt.show()
+            st.pyplot()
+
+        with topwords:
+            with st.expander("All Positive Words", expandData):
+                st.dataframe(positive_df, use_container_width=True)
+            with st.expander("All Negative Words", expandData):
+                st.dataframe(negative_df, use_container_width=True)
+
+        with garis:
+            st.markdown("Garis")
+            _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
+            total_freq_by_month["month"] = total_freq_by_month["month"].apply(lambda x: f"{int(x)}_{calendar.month_name[int(x)]}")
+            
+            st.write(total_freq_by_month) 
+            st.line_chart(total_freq_by_month, x='month')
 
         X_train, X_test, y_train, y_test, data_latih, data_test, all_data = model.train_test_splitTFIDF(X=X, y=y, testSize = 0.1, randState = 0)
         with trainAndTest:
