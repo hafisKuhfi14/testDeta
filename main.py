@@ -67,22 +67,19 @@ def sidebar_menu(pages, authenticator,nameData):
 def get_img_as_base64(file):
     with open(file, "rb") as f:
         data = f.read()
-    return base64.b64encode(data).decode()
- 
-img = get_img_as_base64("background3.png")
-page_bg_img = f"""
-<style>
-    .stApp {{
-        background-image: url("data:image/png;base64,{img}");
-        background-position: center -31vh;
-        background-repeat: repeat;
-    }}
-</style>
-"""
-
-st.markdown(page_bg_img, unsafe_allow_html=True)
+        page_bg_img = f"""
+        <style>
+            .stApp {{
+                background-image: url("data:image/png;base64,{base64.b64encode(data).decode()}");
+                background-position: center -31vh;
+                background-repeat: repeat;
+            }}
+        </style>
+        """        
+    st.markdown(page_bg_img, unsafe_allow_html=True)
 
 def main():
+    get_img_as_base64("img/background3.png")
     # --- USER AUTHENTICATION ---
     # my class function which makes a call to a database and returns a list of lists (nested list), of usernames, names, and passwords
     
