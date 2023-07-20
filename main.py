@@ -73,7 +73,7 @@ def get_img_as_base64(file):
 img = get_img_as_base64("background3.png")
 page_bg_img = f"""
 <style>
-    [data-testid="stAppViewContainer"] > .main {{
+    .stApp {{
         background-image: url("data:image/png;base64,{img}");
         background-position: center -31vh;
         background-repeat: repeat;
