@@ -106,7 +106,6 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         ## Menghapus kata yang kurang dari 3 huruf
         df["Text_Clean"] = df["Text_Clean"].str.findall('\w{3,}').str.join(' ')
         df = df[df['Text_Clean'].str.split().str.len() >= 3]
-
         with shortWord:
             with st.expander("Show Data Shortword", expandData):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
