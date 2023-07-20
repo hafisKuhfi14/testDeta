@@ -17,8 +17,8 @@ from wordcloud import WordCloud
 # Error Handling
 import traceback
 
-# @streamlitdata.cache_data(experimental_allow_widgets=True)
-def analiystThisData(st, df, selectedColumn = "responding"):
+@streamlitdata.cache_data(experimental_allow_widgets=True)
+def analiystThisData(st: streamlitdata, df, selectedColumn = "responding"):
     try:   
         # Menampilkan DataFrame
         st.dataframe(df.head(10))
@@ -50,12 +50,14 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         # ------- CaseFolding
         df["Text_Clean"] = df[selectedColumn].apply(txt_preprocessing.Case_Folding)
         with caseFolding:
+            st.markdown("Proses melakukan perubahan text. Mengubah huruf besar menjadi kecil, serta menghilangkan karakter-karakter tidak diperlukan")
             with st.expander("Show Data CaseFolding", expandData):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
                 
         # ------- Cleansing
         df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.Cleansing)
         with cleansing:
+            st.markdown("Proses melakukan pembersihan text. Menghilangkan noise seperti angka, emoji, link, tagar, spasi berlebih, baris enter (linebreak)")
             with st.expander("Show Data Cleansing", expandData):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
         
@@ -73,6 +75,7 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         # ------- Steaming
         df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.stemming().stem)
         with stemming:
+            st.markdown("Proses menghilangkan kata imbuhan menjadi kata dasar, seperti 'membanggakan' akan diubah menjadi 'bangga'")
             with st.expander("Show Data Stemming", expandData):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
 
@@ -82,6 +85,7 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         df["Text_Clean"] = df["Text_Clean"].apply(lambda text: txt_preprocessing.Slangwords(text, slang_dict))
         df["Text_Clean"] = df["Text_Clean"].str.replace("mhs", "mahasiswa")        
         with slangword:
+            st.markdown("Proses mengubah kata non-baku (slang) atau sering disebut kata gaul menjadi kata baku, seperti kata 'lemot' akan diubah menjadi 'lambat'")
             with st.expander("Show Data Slangword Standarization", expandData):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
 
@@ -93,13 +97,14 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         # ------- Stopword Removal
         df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.stopwordRemoval().remove_stopword)
         with stopwordRemoval:
+            st.markdown("Proses menghilangkan seluruh kata yang terdapat kata hubung seperti 'yang' 'dan' 'dari'")
             with st.expander("Show Data Stopword Removal", expandData):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
         
         # ------- Unwanted Word Removal
         df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.RemoveUnwantedWords)
         with unwantedRemoval:
-            st.markdown("## Unwanted Word Removal")
+            st.markdown("Proses menghilangkan kata-kata yang kurang bermakna berdasarkan kamus. Kata yang dianggap kurang bermakna yaitu nama bulan dalam kalender, 'replaying', 'balas', 'to'.")
             with st.expander("Show Data Unwanted Word Removal", expandData):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
         
@@ -107,6 +112,7 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         df["Text_Clean"] = df["Text_Clean"].str.findall('\w{3,}').str.join(' ')
         df = df[df['Text_Clean'].str.split().str.len() >= 3]
         with shortWord:
+            st.markdown("Proses menghapus kata atau kalimat yang kurang dari 3 karakter. Seperti kata 'di' 'hi'.")
             with st.expander("Show Data Shortword", expandData):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
         
@@ -117,6 +123,7 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         # ------- SplitWord    
         df["Text_Clean_split"] = df["Text_Clean"].apply(feature_extraction.split_word)
         with splitWords:
+            st.markdown("Proses memecah suatu kata menjadi beberapa bagian-bagian.")
             with st.expander("Show Data Splitword", expandData):
                 st.dataframe(df['Text_Clean_split'].head(20), use_container_width=True)
         
@@ -132,6 +139,7 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         df = df[df.polarity != "neutral"]
         
         with labeling:
+            st.markdown("Proses melakukan pelabelan (positive / negative) pada ulasan.")
             textAndPolarity = {
                 "TextClean": df['Text_Clean'],
                 "polarity": df["polarity"]
@@ -156,32 +164,34 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         rankingData = feature_extraction.calculate_tfidf_ranking(df)
         hah = feature_extraction.hitung_kamus(df=df)
         with tfidf:
-            st.markdown("####  TFIDF")
+            st.markdown("Proses memberikan nilai pembobotan pada dokumen. Proses TF-IDF (Term Frequency-Inverse Document Frequency) dilakukan dengan tujuan untuk mengetahui seberapa penting dan seberapa sering suatu kata muncul dalam dokumen tersebut.")
             
-            ranking = pd.DataFrame(rankingData, columns=['Frequency', 'TF-IDF', 'Term'])
-            ranking.sort_values('Frequency', ascending=False, inplace=True)
-            st.dataframe(ranking)
+            # ranking = pd.DataFrame(rankingData, columns=['Frequency', 'TF-IDF', 'Term'])
+            # ranking.sort_values('Frequency', ascending=False, inplace=True)
+            # st.dataframe(ranking)
 
             # Membuat DataFrame dari kamus
-            df_kamus = pd.DataFrame.from_dict(hah, orient='index')
-            df_kamus.index.name = 'Kata'
-            st.dataframe(df_kamus)
-
-            st.text(X[0:2])
+            # df_kamus = pd.DataFrame.from_dict(hah, orient='index')
+            # df_kamus.index.name = 'Kata'
+            # st.dataframe(df_kamus)
+            with st.expander("Pembobotan TF-IDF", expandData):
+                st.text(X[0:])
 
         _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
         # ------- Circle Diagram
         with circleDiagram:
             st.markdown("####  Sentiment count")
+            st.markdown("Proses melakukan visualisasi total sentimen positif dan negatif pada ulasan menggunakan diagram pie")
             sentimentPolarity = df['polarity'].value_counts()
             PdSentimentPolarity = pd.DataFrame({'Sentiment':sentimentPolarity.index,'Tweets':sentimentPolarity.values})
-            st.markdown(f"total keseluruhan ulasan yang sudah melewati tahap cleaning adalah sebanyak: **{sentimentPolarity['positive'] + sentimentPolarity['negative']}**")
             fig = px.pie(PdSentimentPolarity, values='Tweets', names='Sentiment')
             st.plotly_chart(fig)
+            st.markdown(f"total keseluruhan ulasan yang sudah melewati tahap cleaning adalah sebanyak: **{sentimentPolarity['positive'] + sentimentPolarity['negative']}**")
             st.markdown(f"Dari hasil perhitungan diketahui sentiment positive sebanyak **{sentimentPolarity['positive']}** dan sentiment negative sebanyak **{sentimentPolarity['negative']}**\n")
             
         with wordCloud:
             st.markdown("#### Wordcloud")
+            st.markdown("Proses menampilkan seluruh kata sentimen pada wordcloud. Wordcloud adalah sebuah visualisasi yang menampilkan kata-kata, kata yang sering muncul akan memiliki ukuran font lebih besar")
             df_positive = df[df["polarity"] == "positive"]
             df_negative = df[df["polarity"] == "negative"]
             text_positive = ' '.join(df_positive['Text_Clean'])
@@ -203,21 +213,24 @@ def analiystThisData(st, df, selectedColumn = "responding"):
             st.pyplot()
 
         with topwords:
+            st.markdown("Top 20 kata dari label positif dan negatif")
             with st.expander("All Positive Words", expandData):
                 st.dataframe(positive_df, use_container_width=True)
             with st.expander("All Negative Words", expandData):
                 st.dataframe(negative_df, use_container_width=True)
 
         with garis:
-            st.markdown("Garis")
-            _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
+            st.markdown("### Sentimen Bulanan")
+            st.markdown("Proses menampilkan jumlah sentimen positif dan negatif berdasarkan bulan dengan menggunakan diagram garis")
+            # _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
             total_freq_by_month["month"] = total_freq_by_month["month"].apply(lambda x: f"{int(x)}_{calendar.month_name[int(x)]}")
             
-            st.write(total_freq_by_month) 
             st.line_chart(total_freq_by_month, x='month')
+            st.dataframe(total_freq_by_month, use_container_width=True)
 
-        X_train, X_test, y_train, y_test, data_latih, data_test, all_data = model.train_test_splitTFIDF(X=X, y=y, testSize = 0.3, randState = 0)
+        X_train, X_test, y_train, y_test, data_latih, data_test, all_data = model.train_test_splitTFIDF(X=X, y=y, testSize = 0.1, randState = 0)
         with trainAndTest:
+            st.markdown("Proses memisahkan data latih (train) & data uji (test). Data latih (train) sebanyak **90%**, dan data uji (test) sebanyak **10%**")
             st.dataframe(pd.DataFrame({
                 "Total Keseluruhan data": [all_data],
                 "Total Data Latih": [data_latih],
@@ -225,16 +238,21 @@ def analiystThisData(st, df, selectedColumn = "responding"):
             }).reset_index(drop=True), use_container_width=True)
 
         with SVMModel:
+            st.markdown("Proses modeling menggunakan Support Vector Machine berdasarkan data yang sudah dibagi pada tahap __Train & Test Data__")
             score_svmlk, svmLinear, y_pred = model.predictSVM(X_train, y_train, X_test, y_test)
-            st.markdown(f"<center>Akurasi dengan menggunakan Support Vector Machine Linear Kernel: <b color='white'>{score_svmlk:.0%}</b></center>", unsafe_allow_html=True)
+            with st.expander("Hasil Modeling"):
+                st.markdown(f"<center>Akurasi dengan menggunakan Support Vector Machine Linear Kernel: <b color='green'>{score_svmlk:.0%}</b></center>", unsafe_allow_html=True)
             # st.pyplot()
         with naive_bayes:
+            st.markdown("Proses modeling menggunakan Naive Bayes berdasarkan data yang sudah dibagi pada tahap __Train & Test Data__")
             score_svmlk, y_prednb = model.predictNaiveBayes(X_train, y_train, X_test, y_test)
-            st.markdown(f"<center>Akurasi dengan menggunakan Naive Bayes: <b color='white'>{score_svmlk:.0%}</b></center>", unsafe_allow_html=True)
+            with st.expander("Hasil Modeling"):
+                st.markdown(f"<center>Akurasi dengan menggunakan Naive Bayes: <b color='green'>{score_svmlk:.0%}</b></center>", unsafe_allow_html=True)
         
         if (st.checkbox("Gunakan Metode Naive Bayes")):
                 y_pred = y_prednb
         with confusionMatrix:    
+            st.markdown("Proses menampilkan Confusion Matrix dan menghitung akurasi model. Confusion Matrix menghasilkan output True Positive, True Negative, False Positive, False Negative. Jika jumlah True (Positive & Negative) lebih banyak dari False (Positive & Negative), maka hasil data uji (test) dikatakan sudah baik")
             accuracy, confusionMatrixData = evaluation.plot_confusion_matrix_box(y_test=y_test, y_pred=y_pred)
             cm_df = pd.DataFrame(confusionMatrixData, index=["Positive", "Negative"], columns=["Positive", "Negative"])
             plt.figure(figsize=(5,4))
@@ -271,6 +289,7 @@ def analiystThisData(st, df, selectedColumn = "responding"):
             st.pyplot()
 
         with classificationReport:
+            st.markdown("Proses menampilkan hasil kinerja model klasifikasi, proses ini membantu memahami seberapa baik model dapat memprediksi label dengan benar, Jika semakin tinggi persentase Precision, Recall, dan F1-score maka model sudah seimbang dan baik")
             report = evaluation.classificationReport(y_test, y_pred)
             data1 = []
             lines = report.strip().split("\n")

@@ -16,6 +16,7 @@ from app.views.text_predictor import text_predictor
 from app.views.file_predictor import file_predictor
 from app.views.report import report
 from app.views.profile import profile
+import base64
 
 currency = "USD"
 page_title = "Sentimen Analisis Ulasan Pelanggan IndiHome"
@@ -62,6 +63,25 @@ def sidebar_menu(pages, authenticator,nameData):
 
     if selectedNavigationSidebar == "Account Management":
         profile()
+ 
+@st.cache_data(experimental_allow_widgets=True)
+def get_img_as_base64(file):
+    with open(file, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+ 
+img = get_img_as_base64("background3.png")
+page_bg_img = f"""
+<style>
+    [data-testid="stAppViewContainer"] > .main {{
+        background-image: url("data:image/png;base64,{img}");
+        background-position: center -31vh;
+        background-repeat: repeat;
+    }}
+</style>
+"""
+
+st.markdown(page_bg_img, unsafe_allow_html=True)
 
 def main():
     # --- USER AUTHENTICATION ---

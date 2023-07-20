@@ -95,8 +95,8 @@ def countTotalSentimentFrequency(df, result):
     all_negative_words = [word for sublist in result[3] for word in sublist]
 
     # Menghitung frekuensi kata-kata positif dan negatif
-    positive_df = pd.DataFrame(Counter(all_positive_words).most_common(10), columns=['Words Positive', 'frequency'])
-    negative_df = pd.DataFrame(Counter(all_negative_words).most_common(10), columns=['Words Negative', 'frequency'])
+    positive_df = pd.DataFrame(Counter(all_positive_words).most_common(20), columns=['Words Positive', 'frequency'])
+    negative_df = pd.DataFrame(Counter(all_negative_words).most_common(20), columns=['Words Negative', 'frequency'])
 
     # Menghitung frekuensi kata-kata positif dan negatif berdasarkan bulan
     freq_by_month = df.groupby(["month", "polarity"]).size().reset_index(name="frequency")
