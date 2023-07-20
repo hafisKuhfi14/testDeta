@@ -105,6 +105,8 @@ def analiystThisData(st, df, selectedColumn = "responding"):
         
         ## Menghapus kata yang kurang dari 3 huruf
         df["Text_Clean"] = df["Text_Clean"].str.findall('\w{3,}').str.join(' ')
+        df = df[df['Text_Clean'].str.split().str.len() >= 3]
+
         with shortWord:
             with st.expander("Show Data Shortword", expandData):
                 st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
@@ -215,7 +217,7 @@ def analiystThisData(st, df, selectedColumn = "responding"):
             st.write(total_freq_by_month) 
             st.line_chart(total_freq_by_month, x='month')
 
-        X_train, X_test, y_train, y_test, data_latih, data_test, all_data = model.train_test_splitTFIDF(X=X, y=y, testSize = 0.1, randState = 0)
+        X_train, X_test, y_train, y_test, data_latih, data_test, all_data = model.train_test_splitTFIDF(X=X, y=y, testSize = 0.3, randState = 0)
         with trainAndTest:
             st.dataframe(pd.DataFrame({
                 "Total Keseluruhan data": [all_data],

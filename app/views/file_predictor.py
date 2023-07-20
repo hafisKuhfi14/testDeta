@@ -32,8 +32,8 @@ def file_predictor():
         selectedColumn = st.selectbox(
             'Pilih kolom apa yang ingin di analisis ?',
             (df.columns))
-        
-        analiystThisData(st, df, selectedColumn)
+        if (st.button("Analisis")):
+            analiystThisData(st, df, selectedColumn)
     except:
         print(traceback.format_exc())
         st.error(traceback.format_exc())

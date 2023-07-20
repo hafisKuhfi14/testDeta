@@ -4,7 +4,10 @@ from nlp_id.stopword import StopWord
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from nltk.tokenize import word_tokenize
 
-unwanted_words = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'uaddown', 'weareuad', 'lam', 'https', 'igshid']
+unwanted_words = [    
+    'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 
+    'sep', 'oct', 'nov', 'dec', 'uaddown', 'weareuad', 'lam', 'https', 'igshid', 'balas', 'replying', 'to'
+]
 
 def hitung_kemunculan(kalimat, array_kata):
     result = {}
