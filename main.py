@@ -64,7 +64,6 @@ def sidebar_menu(pages, authenticator,nameData):
     if selectedNavigationSidebar == "Account Management":
         profile()
  
-@st.cache_data(experimental_allow_widgets=True)
 def get_img_as_base64(file):
     with open(file, "rb") as f:
         data = f.read()
