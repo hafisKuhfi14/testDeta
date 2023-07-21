@@ -46,7 +46,9 @@ def form_update(username):
         index_role = 0
     else:
         index_role = 1
-    role = st.radio("Pilih role:", ('admin', 'user'), index=index_role, horizontal=True)
+    
+    if (username == 'admin'):
+        role = st.radio("Pilih role:", ('admin', 'user'), index=index_role, horizontal=True)
 
     if (password != ""):
         password = stauth.Hasher([password]).generate()[0]
