@@ -17,7 +17,7 @@ from wordcloud import WordCloud
 # Error Handling
 import traceback
 
-@streamlitdata.cache_data(experimental_allow_widgets=True)
+# @streamlitdata.cache_data(experimental_allow_widgets=True)
 def analiystThisData(st: streamlitdata, df, selectedColumn = "responding"):
     try:   
         # Menampilkan DataFrame
