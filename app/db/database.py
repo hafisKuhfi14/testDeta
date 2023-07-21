@@ -17,11 +17,11 @@ def fetch_all_users():
     res = dbUser.fetch()
     return res.items
 
-def insert_user(username, name, password):
+def insert_user(username, name, password, role):
     """Returns the user on a successful user creation, otherwise raises and error"""
     dbUser = deta.Base("users")
 
-    return dbUser.put({"key": username, "name": name, "password": password})
+    return dbUser.put({"key": username, "name": name, "password": password, "role": role})
 
 def update_user(data, username):
     dbUser = deta.Base("users")

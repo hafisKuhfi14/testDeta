@@ -89,7 +89,6 @@ def main():
     usernames = [user['key'] for user in users]
     names = [user['name'] for user in users]
     passwords = [user['password'] for user in users]
-    username = "" 
     credentials = {"usernames":{}}
 
     for un, name, pw in zip(usernames, names, passwords):
@@ -101,7 +100,7 @@ def main():
     # print(authenticator.credentials)
     
     authenticator._check_cookie()
-    if not st.session_state['authentication_status']:  
+    if not st.session_state['authentication_status']:
         selected = option_menu(
             menu_title=None,
             options=["Login", "Register"],
@@ -122,11 +121,7 @@ def main():
 
         st.markdown("## Sentimen Analisis Ulasan Pelanggan IndiHome di PT.Telkom Indonesia 💹")
         components.html("""<hr style="height:2px;border:none;color:#333;background-color:white;margin-bottom: 1px"/>""", height=50)
-
-        # --- DROP DOWN VALUES FOR SELECTING THE PERIOD ---
-        years = [datetime.today().year, datetime.today().year + 1]
-        months = list(calendar.month_name[1:])
-
+        
         # --- HIDE STREAMLIT STYLE ---
         hide_st_style = """
                     <style>
@@ -137,15 +132,14 @@ def main():
                     </style>
                     """
         st.markdown(hide_st_style, unsafe_allow_html=True)
-
-        # Code to import libraries and get the data goes here
+        get_user = credentials.get("usernames")[f"{st.session_state['username']}"]
 
         # The side bar that contains radio buttons for selection of charts
         print("===============")
         if (st.session_state['username'] == "admin"):
-            sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator,name)
+            sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator, get_user["name"])
         else:
-            sidebar_menu(["Home", "Keluhan", "Text Predictor", "Account Management"], authenticator, name)
+            sidebar_menu(["Home", "Keluhan", "Text Predictor", "Account Management"], authenticator, get_user["name"])
 
 if __name__ == "__main__":
     main()

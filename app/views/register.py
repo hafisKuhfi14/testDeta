@@ -20,7 +20,7 @@ def register_user(form_name: str, location: str='main', preauthorization=True) -
                 return False;
             if new_password == new_password_repeat:
                 hashed_passwords = stauth.Hasher([new_password]).generate()[0]
-                db.insert_user(new_username, new_name, hashed_passwords)
+                db.insert_user(new_username, new_name, hashed_passwords, "user")
                 st.success(f"✔ Selamat anda sudah terdaftar {new_name}, **Silahkan login...**")
             else:
                 st.warning("⚠ Oops.. password tidak valid")

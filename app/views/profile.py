@@ -13,6 +13,7 @@ def profile():
     # Mengubah "key" menjadi "username"
     for item in users:
         item["username"] = item.pop("key")
+        item.pop("password")
 
     st.dataframe(users ,use_container_width=True)
     updateUser, deleteUser = st.tabs(["Update", "Delete"])
