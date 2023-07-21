@@ -42,6 +42,12 @@ def form_update(username):
     user = db.get_username(username)
     name = st.text_input("Nama: ", f"{user['name']}")
     password = st.text_input("Password: ", type='password')
+    if (user['role'] == 'admin'):
+        index_role = 0
+    else:
+        index_role = 1
+    role = st.radio("Pilih role:", ('admin', 'user'), index=index_role, horizontal=True)
+
     if (password != ""):
         password = stauth.Hasher([password]).generate()[0]
     else:
@@ -49,8 +55,9 @@ def form_update(username):
 
     if (st.button("Update")):
         data = {
-            "name":name, 
-            "password":password
+            "name":name,
+            "password":password,
+            'role': role
         }
         db.update_user(data, username)
         st.success(f"Success Update {name}")
