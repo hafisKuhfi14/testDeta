@@ -34,17 +34,23 @@ def Case_Folding(text):
 
 def Cleansing(text):
     try:
-        # Definisikan pola regex untuk mencocokkan tag atau tagar
-        pattern = r"[@#]\w+"
-        
+        text =  text.lstrip()
         # Hapus tag atau tagar menggunakan metode sub() dari modul re
-        text_cleaned = re.sub(pattern, "", text)
-
-        # Definisikan pola regex untuk mendeteksi link
-        pattern = r"(http://|https://|www\.)\S+"
+        text_cleanedat = re.sub(r'@\w+\s', '', text)
+        text_cleaned = re.sub(r'#\w+\s', '', text_cleanedat)
         
+        # Definisikan pola regex untuk mendeteksi link
+        pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+
+        # Definisikan pola regex untuk mendeteksi domain
+        patternDomain = r'\b[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}\b'
+        
+        # Hapus domain menggunakan metode sub() dari modul re
+        text = re.sub(patternDomain, "", text_cleaned)
+
         # Hapus link menggunakan metode sub() dari modul re
-        text = re.sub(pattern, "", text_cleaned)
+        text = re.sub(pattern, "", text) 
+        
         # hapus non-ascii 
         text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("utf-8", "ignore")
         
@@ -54,7 +60,7 @@ def Cleansing(text):
         # Menghapus angka
         text = re.sub("\S*\d\S*", "", text).strip()
         text = re.sub("\b\d+\b", " ", text)
-        return text
+        return text.strip()
     except TypeError as error:
         raise TypeError(str(error))
         
@@ -88,7 +94,7 @@ def RemoveUnwantedWords(text):
     return ' '.join(fillterd_sentence)
 
 # Menghitung kata-kata positif / negatif pada teks dan menentukan sentimennya
-def lexicon_indonesia(text, list_positive, list_negative):
+def     lexicon_indonesia(text, list_positive, list_negative):
     positive_words = []
     negative_words = []
     neutral_words = []

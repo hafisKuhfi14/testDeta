@@ -166,14 +166,6 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding"):
         with tfidf:
             st.markdown("Proses memberikan nilai pembobotan pada dokumen. Proses TF-IDF (Term Frequency-Inverse Document Frequency) dilakukan dengan tujuan untuk mengetahui seberapa penting dan seberapa sering suatu kata muncul dalam dokumen tersebut.")
             
-            # ranking = pd.DataFrame(rankingData, columns=['Frequency', 'TF-IDF', 'Term'])
-            # ranking.sort_values('Frequency', ascending=False, inplace=True)
-            # st.dataframe(ranking)
-
-            # Membuat DataFrame dari kamus
-            # df_kamus = pd.DataFrame.from_dict(hah, orient='index')
-            # df_kamus.index.name = 'Kata'
-            # st.dataframe(df_kamus)
             with st.expander("Pembobotan TF-IDF", expandData):
                 st.text(X[0:])
 
