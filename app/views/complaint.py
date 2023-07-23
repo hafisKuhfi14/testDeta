@@ -3,14 +3,15 @@ import random
 import streamlit as st  # pip install streamlit
 from ..db import api
 
-def complaint():
+def complaint(userData):
     st.markdown("### Input Keluhan Pelanggan")
     username = st.session_state['username']
-    chatAsRole = "user"
+    role = st.session_state['username']
+    chatAsRole = userData['role']
     if (st.button("🔄 Refresh")):
         st.experimental_rerun()
 
-    if (username == "admin"):
+    if (chatAsRole == "admin" or chatAsRole == 'assistant'):
         chatAsRole = "assistant"
         users = asyncio.run(api.get_users())
         selected_tab = st.sidebar.selectbox("Select User", [item['username'] for item in users if item['username'] != 'admin'])
@@ -19,7 +20,7 @@ def complaint():
         if selected_tab is not None:
             found_user = next((item for item in users if item["username"] == selected_tab), None)
             messagesUser, messageChat = checkUser(found_user, selected_tab)
-            print(messageChat)
+            # print(messageChat)
             input_chat_disable = False
 
             if (st.button("Delete Chat")):

@@ -18,7 +18,7 @@ from wordcloud import WordCloud
 import traceback
 
 # @streamlitdata.cache_data(experimental_allow_widgets=True)
-def analiystThisData(st: streamlitdata, df, selectedColumn = "responding"):
+def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page = "home"):
     try:   
         # Menampilkan DataFrame
         st.dataframe(df.head(10))
@@ -39,7 +39,10 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding"):
         splitWords, labeling, tfidf = st.tabs(["Split Words", "Labeling", "TF-IDF"])
 
         st.markdown("### Visualisasi Data")
-        garis, topwords, wordCloud, circleDiagram = st.tabs(["garis", "topwords", "WordCloud", "Circle Diagram"])
+        if (page == "home"):
+            garis, topwords, wordCloud, circleDiagram = st.tabs(["Polarity Bulanan", "topwords", "WordCloud", "Circle Diagram"])
+        else:
+            topwords, wordCloud, circleDiagram = st.tabs(["topwords", "WordCloud", "Circle Diagram"])
 
         st.markdown("### Modeling")
         SVMModel, trainAndTest, naive_bayes = st.tabs(["Support Vector Machine", "Train & Test Data", "Naïve Bayes"])
@@ -211,14 +214,15 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding"):
             with st.expander("All Negative Words", expandData):
                 st.dataframe(negative_df, use_container_width=True)
 
-        with garis:
-            st.markdown("### Sentimen Bulanan")
-            st.markdown("Proses menampilkan jumlah sentimen positif dan negatif berdasarkan bulan dengan menggunakan diagram garis")
-            # _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
-            total_freq_by_month["month"] = total_freq_by_month["month"].apply(lambda x: f"{int(x)}_{calendar.month_name[int(x)]}")
-            
-            st.line_chart(total_freq_by_month, x='month')
-            st.dataframe(total_freq_by_month, use_container_width=True)
+        if (page == "home"):
+            with garis:
+                st.markdown("### Sentimen Bulanan")
+                st.markdown("Proses menampilkan jumlah sentimen positif dan negatif berdasarkan bulan dengan menggunakan diagram garis")
+                # _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
+                total_freq_by_month["month"] = total_freq_by_month["month"].apply(lambda x: f"{int(x)}_{calendar.month_name[int(x)]}")
+                
+                st.line_chart(total_freq_by_month, x='month')
+                st.dataframe(total_freq_by_month, use_container_width=True)
 
         X_train, X_test, y_train, y_test, data_latih, data_test, all_data = model.train_test_splitTFIDF(X=X, y=y, testSize = 0.1, randState = 0)
         with trainAndTest:

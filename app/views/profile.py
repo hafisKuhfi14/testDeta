@@ -6,7 +6,7 @@ import streamlit_authenticator as stauth
 def profile():
     st.markdown("### User Management")
     if (st.session_state['username'] != "admin"):
-        form_update(st.session_state['username'])
+        form_update(st.session_state['username'], 'user')
         return
     st.markdown("Data User")
     users = db.fetch_all_users()
@@ -24,7 +24,7 @@ def profile():
         st.write("Pilih username: ")
         selected_tab = st.selectbox("Select User", [user['username'] for user in users], key="update")
         if selected_tab is not None:
-            form_update(selected_tab)
+            form_update(selected_tab, 'admin')
         
     with deleteUser:
         st.markdown("### Delete")
@@ -38,7 +38,7 @@ def profile():
             if (selected_tab == st.session_state['username']):
                 st.warning("Ooops tidak dapat menghapus diri sendiri")
 
-def form_update(username):
+def form_update(username, loginAsA):
     user = db.get_username(username)
     name = st.text_input("Nama: ", f"{user['name']}")
     password = st.text_input("Password: ", type='password')
@@ -47,7 +47,7 @@ def form_update(username):
     else:
         index_role = 1
     
-    if (username == 'admin'):
+    if (loginAsA == 'admin'):
         role = st.radio("Pilih role:", ('admin', 'user'), index=index_role, horizontal=True)
 
     if (password != ""):

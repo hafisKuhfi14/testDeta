@@ -26,7 +26,7 @@ async def home():
             df = pd.read_csv("app/data/indihome3_facebookscrape.csv")
 
         if (st.session_state['username'] == "admin"):
-            analiystThisData(st, df)
+            analiystThisData(st, df, page="home")
         else:
             st.dataframe(df.head(10))
     except:

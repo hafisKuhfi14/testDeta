@@ -33,7 +33,7 @@ def file_predictor():
             'Pilih kolom apa yang ingin di analisis ?',
             (df.columns))
         if (st.button("Analisis")):
-            analiystThisData(st, df, selectedColumn)
+            analiystThisData(st, df, selectedColumn, page="file_predictor")
     except:
         print(traceback.format_exc())
         st.error(traceback.format_exc())

@@ -26,9 +26,9 @@ layout = "centered"
 
 st.set_page_config(page_title=page_title, page_icon=page_icon, layout=layout)
 
-def sidebar_menu(pages, authenticator,nameData):
+def sidebar_menu(pages, authenticator, userData):
     with st.sidebar:
-        st.markdown(f'# Selamat Datang {nameData}')
+        st.markdown(f'# Selamat Datang { userData["name"]}')
         selectedNavigationSidebar = option_menu(
             menu_title=None,
             options=pages,
@@ -47,7 +47,7 @@ def sidebar_menu(pages, authenticator,nameData):
         # The main window
 
     if selectedNavigationSidebar == "Keluhan":
-        complaint()
+        complaint(userData)
 
     if selectedNavigationSidebar == "logout":
         authenticator.logout("Logout", "main")
@@ -89,10 +89,11 @@ def main():
     usernames = [user['key'] for user in users]
     names = [user['name'] for user in users]
     passwords = [user['password'] for user in users]
+    roles = [user['role'] for user in users]
     credentials = {"usernames":{}}
 
-    for un, name, pw in zip(usernames, names, passwords):
-        user_dict = {"name":name,"password":pw}
+    for un, name, pw, role in zip(usernames, names, passwords, roles):
+        user_dict = {"name":name,"password":pw, 'role': role}
         credentials["usernames"].update({un:user_dict})
 
     authenticator = stauth.Authenticate(credentials, "app_home", "auth", cookie_expiry_days=30)
@@ -136,10 +137,10 @@ def main():
 
         # The side bar that contains radio buttons for selection of charts
         print("===============")
-        if (st.session_state['username'] == "admin"):
-            sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator, get_user["name"])
+        if (get_user['role'] == "admin"):
+            sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator, get_user)
         else:
-            sidebar_menu(["Home", "Keluhan", "Text Predictor", "Account Management"], authenticator, get_user["name"])
+            sidebar_menu(["Home", "Keluhan", "Text Predictor", "Account Management"], authenticator, get_user)
 
 if __name__ == "__main__":
     main()
