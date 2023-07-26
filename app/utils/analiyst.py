@@ -5,7 +5,7 @@ from ..modules import feature_extraction
 from ..modules import model
 from ..modules import evaluation
 from ..modules import txt_preprocessing
-from ..utils.textCleaning import positiveOrNegativeDictionary, countTotalSentimentFrequency
+from ..utils.textCleaning import positiveOrNegativeDictionary, countTotalSentimentFrequency, countMonthTotalSentimen
 
 import plotly.express as px
 import matplotlib.pyplot as plt
@@ -172,7 +172,19 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
             with st.expander("Pembobotan TF-IDF", expandData):
                 st.text(X[0:])
 
-        _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
+        positive_df, negative_df = countTotalSentimentFrequency(df, result)
+        
+        if (page == "home"):
+            _, total_freq_by_month = countMonthTotalSentimen(df)
+            with garis:
+                st.markdown("### Sentimen Bulanan")
+                st.markdown("Proses menampilkan jumlah sentimen positif dan negatif berdasarkan bulan dengan menggunakan diagram garis")
+                # _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
+                total_freq_by_month["month"] = total_freq_by_month["month"].apply(lambda x: f"{int(x)}_{calendar.month_name[int(x)]}")
+                
+                st.line_chart(total_freq_by_month, x='month')
+                st.dataframe(total_freq_by_month, use_container_width=True)
+
         # ------- Circle Diagram
         with circleDiagram:
             st.markdown("####  Sentiment count")
@@ -214,15 +226,9 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
             with st.expander("All Negative Words", expandData):
                 st.dataframe(negative_df, use_container_width=True)
 
-        if (page == "home"):
-            with garis:
-                st.markdown("### Sentimen Bulanan")
-                st.markdown("Proses menampilkan jumlah sentimen positif dan negatif berdasarkan bulan dengan menggunakan diagram garis")
-                # _, positive_df, negative_df, total_freq_by_month = countTotalSentimentFrequency(df, result)
-                total_freq_by_month["month"] = total_freq_by_month["month"].apply(lambda x: f"{int(x)}_{calendar.month_name[int(x)]}")
-                
-                st.line_chart(total_freq_by_month, x='month')
-                st.dataframe(total_freq_by_month, use_container_width=True)
+            # Rekomendasi berdasarkan sentimen positif tertinggi
+            rekomendasi_sentimen_positif = df[df['polarity_score'] > 0].sort_values(by='polarity_score', ascending=False)
+            st.write(rekomendasi_sentimen_positif)
 
         X_train, X_test, y_train, y_test, data_latih, data_test, all_data = model.train_test_splitTFIDF(X=X, y=y, testSize = 0.1, randState = 0)
         with trainAndTest:

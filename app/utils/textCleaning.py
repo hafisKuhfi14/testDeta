@@ -2,6 +2,7 @@ import pandas as pd
 from collections import Counter
 from ..modules import txt_preprocessing
 from ..modules import feature_extraction
+import streamlit as streamlitParam  # pip install streamlit
 import calendar
 
 
@@ -22,26 +23,33 @@ def textCleaning(df, neutral = False):
     """
     # ------- CaseFolding
     df["Text_Clean"] = df["responding"].apply(txt_preprocessing.Case_Folding)
+
     # ------- Cleansing
-    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.Cleansing)
+    df["Cleansing"] = df["Text_Clean"].apply(txt_preprocessing.Cleansing)
+
     # ------- Lemmatisasi
-    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.lemmatisasi().lemmatize)
+    df["Lemmatisasi"] = df["Cleansing"].apply(txt_preprocessing.lemmatisasi().lemmatize)
+
     # ------- Steaming
-    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.stemming().stem)
+    df["Stemming"] = df["Lemmatisasi"].apply(txt_preprocessing.stemming().stem)
 
     # ------- Slangword Standrization
     slang_dictionary = pd.read_csv("https://raw.githubusercontent.com/insomniagung/kamus_kbba/main/kbba.txt", delimiter="\t", names=['slang', 'formal'], header=None, encoding='utf-8')
     slang_dict = pd.Series(slang_dictionary["formal"].values, index = slang_dictionary["slang"]).to_dict()
-    df["Text_Clean"] = df["Text_Clean"].apply(lambda text: txt_preprocessing.Slangwords(text, slang_dict))
-    df["Text_Clean"] = df["Text_Clean"].str.replace("mhs", "mahasiswa")
+    df["Slangword"] = df["Stemming"].apply(lambda text: txt_preprocessing.Slangwords(text, slang_dict))
+    df["Slangword"] = df["Slangword"].str.replace("mhs", "mahasiswa")
+
     # ------- Stopword Removal
-    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.stopwordRemoval().remove_stopword)
+    df["Stopword"] = df["Slangword"].apply(txt_preprocessing.stopwordRemoval().remove_stopword)
+
     # ------- Unwanted Word Removal
-    df["Text_Clean"] = df["Text_Clean"].apply(txt_preprocessing.RemoveUnwantedWords)
+    df["UnwantedWord"] = df["Stopword"].apply(txt_preprocessing.RemoveUnwantedWords)
+
     ## Menghapus kata yang kurang dari 3 huruf
-    df["Text_Clean"] = df["Text_Clean"].str.findall('\w{3,}').str.join(' ')
+    df["Shortword"] = df["UnwantedWord"].str.findall('\w{3,}').str.join(' ')
+
     # ------- SplitWord    
-    df["Text_Clean_split"] = df["Text_Clean"].apply(feature_extraction.split_word)
+    df["Text_Clean_split"] = df["Shortword"].apply(feature_extraction.split_word)
     
     ## Memberi label pada data ulasan
     ### Pada dataset belum terdapat label positif dan negatif pada ulasan, sehingga perlu dilakukan pelabelan.
@@ -88,8 +96,6 @@ def sentimentAnalysis(df, neutral):
 def countTotalSentimentFrequency(df, result):
     """Counting total sentiment positive & negative based on topik popular as frequency"""
 
-    df["month"] = pd.DatetimeIndex(df["postDate"]).month
-
     # Menggabungkan semua list kata positif dan negatif menjadi satu list
     all_positive_words = [word for sublist in result[2] for word in sublist]
     all_negative_words = [word for sublist in result[3] for word in sublist]
@@ -98,10 +104,15 @@ def countTotalSentimentFrequency(df, result):
     positive_df = pd.DataFrame(Counter(all_positive_words).most_common(20), columns=['Words Positive', 'frequency'])
     negative_df = pd.DataFrame(Counter(all_negative_words).most_common(20), columns=['Words Negative', 'frequency'])
 
+    return positive_df, negative_df
+
+def countMonthTotalSentimen(df):
+    df["month"] = pd.DatetimeIndex(df["postDate"]).month
+
     # Menghitung frekuensi kata-kata positif dan negatif berdasarkan bulan
     freq_by_month = df.groupby(["month", "polarity"]).size().reset_index(name="frequency")
 
     # Membentuk pivot table untuk mendapatkan total frekuensi berdasarkan bulan
     total_freq_by_month = freq_by_month.pivot_table(index="month", columns="polarity", values="frequency", aggfunc="sum", fill_value=0).reset_index()
+    return df, total_freq_by_month
     
-    return df, positive_df, negative_df, total_freq_by_month

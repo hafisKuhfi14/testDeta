@@ -16,6 +16,7 @@ from app.views.text_predictor import text_predictor
 from app.views.file_predictor import file_predictor
 from app.views.report import report
 from app.views.profile import profile
+from app.views.reset_password import reset_password
 import base64
 
 currency = "USD"
@@ -104,7 +105,7 @@ def main():
     if not st.session_state['authentication_status']:
         selected = option_menu(
             menu_title=None,
-            options=["Login", "Register"],
+            options=["Login", "Register", "Lupa Password"],
             icons=["login", "register"],  # https://icons.getbootstrap.com/
             orientation="horizontal",
         )
@@ -114,8 +115,8 @@ def main():
                 st.error("Username/password is incorrect")
             if authentication_status == None:
                 st.warning("Please enter your username and password")
-        if selected == "Register":
-            register_user("Register User", 'main', preauthorization=False)
+        if selected == "Lupa Password":
+            reset_password()
     else:
         # -------------- SETTINGS --------------
         selected = None
@@ -129,7 +130,8 @@ def main():
                     #MainMenu {visibility: hidden;}
                     .css-1544g2n.e1fqkh3o4 {padding: 3rem 1rem 1.5rem}
                     .css-z3au9t.egzxvld2 {visibility: hidden;}  
-                    button[aria-selected='true'] {color: #ff0061; background-color:#272727; padding:10px}
+                    button[aria-selected='true'] {padding:10px; background-color:#ff4b4b}
+                    button[aria-selected='true'] p {color:#fff; font-weight:bold;}
                     </style>
                     """
         st.markdown(hide_st_style, unsafe_allow_html=True)

@@ -32,6 +32,9 @@ def predictNaiveBayes(X_train, y_train, X_test, y_test):
     return score_nb, y_pred
 
 def predictFromPKL(tfidf, svm, text):
-    new_features = tfidf.transform(text) 
+    new_features = tfidf.transform(text)
     y_pred = svm.predict(new_features)
+    # score = metrics.accuracy_score(new_features, y_pred)
+    print("============= SCORE")
+    print(new_features)
     return y_pred, new_features

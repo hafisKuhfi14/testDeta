@@ -94,7 +94,7 @@ def RemoveUnwantedWords(text):
     return ' '.join(fillterd_sentence)
 
 # Menghitung kata-kata positif / negatif pada teks dan menentukan sentimennya
-def     lexicon_indonesia(text, list_positive, list_negative):
+def lexicon_indonesia(text, list_positive, list_negative):
     positive_words = []
     negative_words = []
     neutral_words = []
