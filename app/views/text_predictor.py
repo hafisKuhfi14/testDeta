@@ -19,7 +19,7 @@ async def text_predictor():
     if (algoritm == "Support Vector Machine"):
         pickle_in = open('model_svm.pkl', 'rb')
     else:
-        pickle_in = open('model_svm.pkl', 'rb')
+        pickle_in = open('model_nb.pkl', 'rb')
     if submit:
         if text_predictor == "":
             st.error("OOPPSS... Kolom ulasan tidak terisi")
