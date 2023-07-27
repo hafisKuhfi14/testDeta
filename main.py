@@ -140,9 +140,9 @@ def main():
         # The side bar that contains radio buttons for selection of charts
         print("===============")
         if (get_user['role'] == "admin"):
-            sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator, get_user)
+            sidebar_menu(["Home", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator, get_user)
         else:
-            sidebar_menu(["Home", "Keluhan", "Text Predictor", "Account Management"], authenticator, get_user)
+            sidebar_menu(["Home", "Text Predictor", "Account Management"], authenticator, get_user)
 
 if __name__ == "__main__":
     main()
