@@ -106,7 +106,7 @@ def main():
         selected = option_menu(
             menu_title=None,
             options=["Login", "Register", "Lupa Password"],
-            icons=["login", "register"],  # https://icons.getbootstrap.com/
+            icons=["login", "register", "key"],  # https://icons.getbootstrap.com/
             orientation="horizontal",
         )
         if selected == "Login":
@@ -115,6 +115,8 @@ def main():
                 st.error("Username/password is incorrect")
             if authentication_status == None:
                 st.warning("Please enter your username and password")
+        if selected == "Register":
+            register_user("Register User", 'main', preauthorization=False)
         if selected == "Lupa Password":
             reset_password()
     else:
@@ -140,9 +142,9 @@ def main():
         # The side bar that contains radio buttons for selection of charts
         print("===============")
         if (get_user['role'] == "admin"):
-            sidebar_menu(["Home", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator, get_user)
+            sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator, get_user)
         else:
-            sidebar_menu(["Home", "Text Predictor", "Account Management"], authenticator, get_user)
+            sidebar_menu(["Home", "Keluhan", "Text Predictor", "Account Management"], authenticator, get_user)
 
 if __name__ == "__main__":
     main()
