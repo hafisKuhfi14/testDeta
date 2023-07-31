@@ -15,17 +15,100 @@ async def text_predictor():
         submit = st.form_submit_button("Analyze")
     "---"
     
-    algoritm = st.radio("Pilih Algoritma: ", ("Support Vector Machine", "Naive Bayes"), horizontal=True)
+    algoritm = st.radio("Pilih Algoritma: ", ("Support Vector Machine", "Naive Bayes", "all"), horizontal=True)
     if (algoritm == "Support Vector Machine"):
         pickle_in = open('model_svm.pkl', 'rb')
+    elif(algoritm == "all"):
+        pickle_in_svm = open('model_svm.pkl', 'rb')
+        pickle_in_nb = open('model_nb.pkl', 'rb')
     else:
         pickle_in = open('model_nb.pkl', 'rb')
     if submit:
         if text_predictor == "":
             st.error("OOPPSS... Kolom ulasan tidak terisi")
             return
-
+        
         text_predictor_clean, _ = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=False)
+        if (algoritm == "all"):
+            svm, tfidf_svm, y_test_svm = pickle.load(pickle_in_svm)
+            nb, tfidf_nb, y_test_svm = pickle.load(pickle_in_nb)
+            st.markdown("### Support Vector Machine")
+            textPolarity2 = {"term": [], "label": [], "score": []}
+            st.write(text_predictor_clean['Text_Clean_split'])
+            score = 0
+            if (text_predictor_clean['Text_Clean_split'].empty):
+                st.info("Maaf sentimen ini bersifat neutral")
+                return
+            for text in text_predictor_clean['Text_Clean_split'][0]:
+                y_pred, _ = model.predictFromPKL(tfidf_svm, svm, [text])
+                textPolarity2['term'].append(text)
+                textPolarity2['label'].append(y_pred[0])
+                if (y_pred[0] == "negative"):
+                    score -= 1
+                    textPolarity2["score"].append(-1) 
+                if (y_pred[0] == "positive"):
+                    score += 1
+                    textPolarity2["score"].append(1) 
+                if (y_pred[0] == "neutral"):
+                    textPolarity2["score"].append(0)
+
+            text_predictor_clean['polarity_score'] = score
+            y_pred, _ = model.predictFromPKL(tfidf_svm, svm, [text_predictor])
+            if (y_pred[0] == "positive"):
+                st.success("Ulasan tersebut bernada positive 😊")
+            elif(y_pred[0] == "negative"):
+                st.error("Ulasan tersebut bernada negative 😡")
+            # del textPolarity['neutral']
+            st.write("Sentimen Per-kata suatu ulasan")
+            # Temukan panjang maksimum dari array dalam dictionary
+            max_length = max(len(textPolarity2[key]) for key in textPolarity2) 
+            # Buat dictionary baru dengan panjang array yang sama untuk setiap kunci
+            data_equal_length = {key: textPolarity2[key] + [""] * (max_length - len(textPolarity2[key])) for key in textPolarity2}
+            df = pd.DataFrame(data_equal_length) 
+            st.table(df)
+            st.markdown("### TextPreprocessing")
+            st.markdown("Text preprocessing adalah suatu proses untuk menyeleksi data text agar menjadi lebih terstruktur lagi dengan melalui serangkaian tahapan yang meliputi tahapan case folding, tokenizing, filtering dan stemming")
+            text_preprocessing(text_predictor_clean)
+
+            st.markdown("### Naive Bayes")
+            textPolarity = { "positive": [], "negative": [], "neutral": []}
+            textPolarity2 = {"term": [], "label": [], "score": []}
+            score = 0
+            
+            for text in text_predictor_clean['Text_Clean_split'][0]:
+                y_pred, _ = model.predictFromPKL(tfidf_nb, nb, [text])
+                print(y_pred)
+                textPolarity2['term'].append(text)
+                textPolarity2['label'].append(y_pred[0])
+                if (y_pred[0] == "negative"):
+                    score -= 1
+                    textPolarity2["score"].append(-1) 
+                if (y_pred[0] == "positive"):
+                    score += 1
+                    textPolarity2["score"].append(1) 
+                if (y_pred[0] == "neutral"):
+                    textPolarity2["score"].append(0) 
+
+            text_predictor_clean['polarity_score'] = score
+            y_pred, _ = model.predictFromPKL(tfidf_nb, svm, [text_predictor])
+            if (y_pred[0] == "positive"):
+                st.success("Ulasan tersebut bernada positive 😊")
+            elif(y_pred[0] == "negative"):
+                st.error("Ulasan tersebut bernada negative 😡")
+            # del textPolarity['neutral']
+            st.write("Sentimen Per-kata suatu ulasan")
+            # Temukan panjang maksimum dari array dalam dictionary
+            max_length = max(len(textPolarity2[key]) for key in textPolarity2) 
+            # Buat dictionary baru dengan panjang array yang sama untuk setiap kunci
+            data_equal_length = {key: textPolarity2[key] + [""] * (max_length - len(textPolarity2[key])) for key in textPolarity2}
+            df = pd.DataFrame(data_equal_length) 
+            st.table(df)
+
+            st.markdown("### TextPreprocessing")
+            st.markdown("Text preprocessing adalah suatu proses untuk menyeleksi data text agar menjadi lebih terstruktur lagi dengan melalui serangkaian tahapan yang meliputi tahapan case folding, tokenizing, filtering dan stemming")
+
+            text_preprocessing(text_predictor_clean)
+            return
 
         svm, tfidf, y_test = pickle.load(pickle_in)
         textPolarity = { "positive": [], "negative": [], "neutral": []}
@@ -50,7 +133,7 @@ async def text_predictor():
         max_length = max(len(textPolarity[key]) for key in textPolarity) 
         # Buat dictionary baru dengan panjang array yang sama untuk setiap kunci
         data_equal_length = {key: textPolarity[key] + [""] * (max_length - len(textPolarity[key])) for key in textPolarity}
-        df = pd.DataFrame(data_equal_length) 
+        df = pd.DataFrame(data_equal_length)
         st.table(df)
 
         st.markdown("### TextPreprocessing")
@@ -82,7 +165,8 @@ def text_preprocessing(df):
         st.markdown(kotak_berwarna("#c2c2c27a", f"Shortword: {df['Shortword'][0]}"), unsafe_allow_html=True)
         df_labeling = {
                 "split_word": df['Text_Clean_split'],
-                "polarity": df['polarity']
+                "polarity": df['polarity'],
+                "bobot": df['polarity_score']
         }
         st.dataframe(df_labeling, use_container_width=True)
         # st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
