@@ -28,7 +28,7 @@ async def text_predictor():
             st.error("OOPPSS... Kolom ulasan tidak terisi")
             return
         
-        text_predictor_clean, _ = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=False)
+        text_predictor_clean, _ = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=True)
         if (algoritm == "all"):
             svm, tfidf_svm, y_test_svm = pickle.load(pickle_in_svm)
             nb, tfidf_nb, y_test_svm = pickle.load(pickle_in_nb)
