@@ -165,8 +165,7 @@ def text_preprocessing(df):
         st.markdown(kotak_berwarna("#c2c2c27a", f"Shortword: {df['Shortword'][0]}"), unsafe_allow_html=True)
         df_labeling = {
                 "split_word": df['Text_Clean_split'],
-                "polarity": df['polarity'],
-                "bobot": df['polarity_score']
+                "polarity": df['polarity']
         }
         st.dataframe(df_labeling, use_container_width=True)
         # st.dataframe(df['Text_Clean'].head(20), use_container_width=True)
