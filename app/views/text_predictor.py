@@ -28,10 +28,10 @@ async def text_predictor():
             st.error("OOPPSS... Kolom ulasan tidak terisi")
             return
         
-        text_predictor_clean, _ = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=False)
+        text_predictor_clean, _ = textCleaning(pd.DataFrame([text_predictor], columns=["responding"]), neutral=True)
         if (algoritm == "all"):
-            svm, tfidf_svm, y_test_svm = pickle.load(pickle_in_svm)
-            nb, tfidf_nb, y_test_svm = pickle.load(pickle_in_nb)
+            svm, tfidf_svm = pickle.load(pickle_in_svm)
+            nb, tfidf_nb = pickle.load(pickle_in_nb)
             st.markdown("### Support Vector Machine")
             textPolarity2 = {"term": [], "label": [], "score": []}
             st.write(text_predictor_clean['Text_Clean_split'])
@@ -53,11 +53,13 @@ async def text_predictor():
                     textPolarity2["score"].append(0)
 
             text_predictor_clean['polarity_score'] = score
-            y_pred, _ = model.predictFromPKL(tfidf_svm, svm, [text_predictor])
-            if (y_pred[0] == "positive"):
+            # y_pred, _ = model.predictFromPKL(tfidf_svm, svm, [text_predictor])
+            if (score > 0):
                 st.success("Ulasan tersebut bernada positive 😊")
-            elif(y_pred[0] == "negative"):
+            elif(score < 0):
                 st.error("Ulasan tersebut bernada negative 😡")
+            else:
+                st.info("Ulasan tersebut bernada neutral")
             # del textPolarity['neutral']
             st.write("Sentimen Per-kata suatu ulasan")
             # Temukan panjang maksimum dari array dalam dictionary
@@ -73,11 +75,10 @@ async def text_predictor():
             st.markdown("### Naive Bayes")
             textPolarity = { "positive": [], "negative": [], "neutral": []}
             textPolarity2 = {"term": [], "label": [], "score": []}
+
             score = 0
-            
             for text in text_predictor_clean['Text_Clean_split'][0]:
                 y_pred, _ = model.predictFromPKL(tfidf_nb, nb, [text])
-                print(y_pred)
                 textPolarity2['term'].append(text)
                 textPolarity2['label'].append(y_pred[0])
                 if (y_pred[0] == "negative"):
@@ -90,11 +91,13 @@ async def text_predictor():
                     textPolarity2["score"].append(0) 
 
             text_predictor_clean['polarity_score'] = score
-            y_pred, _ = model.predictFromPKL(tfidf_nb, svm, [text_predictor])
-            if (y_pred[0] == "positive"):
+            # y_pred, _ = model.predictFromPKL(tfidf_nb, nb, [text_predictor])
+            if (score > 0):
                 st.success("Ulasan tersebut bernada positive 😊")
-            elif(y_pred[0] == "negative"):
+            elif(score < 0):
                 st.error("Ulasan tersebut bernada negative 😡")
+            else:
+                st.info("Ulasan tersebut bernada neutral")
             # del textPolarity['neutral']
             st.write("Sentimen Per-kata suatu ulasan")
             # Temukan panjang maksimum dari array dalam dictionary
@@ -110,7 +113,7 @@ async def text_predictor():
             text_preprocessing(text_predictor_clean)
             return
 
-        svm, tfidf, y_test = pickle.load(pickle_in)
+        svm, tfidf = pickle.load(pickle_in)
         textPolarity = { "positive": [], "negative": [], "neutral": []}
         for text in text_predictor_clean['Text_Clean_split'][0]:
             y_pred, _ = model.predictFromPKL(tfidf, svm, [text])
