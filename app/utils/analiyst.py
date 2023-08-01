@@ -145,6 +145,7 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
             st.markdown("Proses melakukan pelabelan (positive / negative) pada ulasan.")
             textAndPolarity = {
                 "TextClean": df['Text_Clean'],
+                "score": df['polarity_score'],
                 "polarity": df["polarity"]
             }
             st.markdown("#### Daftar Library Positive & Negative")
