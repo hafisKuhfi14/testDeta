@@ -134,6 +134,7 @@ def main():
                     .css-z3au9t.egzxvld2 {visibility: hidden;}  
                     button[aria-selected='true'] {padding:10px; background-color:#ff4b4b}
                     button[aria-selected='true'] p {color:#fff; font-weight:bold;}
+                    button[aria-selected='true']:hover,button[aria-selected='true']:focus  {padding:10px; background-color:#910000}
                     </style>
                     """
         st.markdown(hide_st_style, unsafe_allow_html=True)

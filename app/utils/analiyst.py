@@ -248,9 +248,9 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
             # st.pyplot()
         with naive_bayes:
             st.markdown("Proses modeling menggunakan Naive Bayes berdasarkan data yang sudah dibagi pada tahap __Train & Test Data__")
-            score_svmlk, y_prednb = model.predictNaiveBayes(X_train, y_train, X_test, y_test)
+            score_nblk, y_prednb = model.predictNaiveBayes(X_train, y_train, X_test, y_test)
             with st.expander("Hasil Modeling"):
-                st.markdown(f"<center>Akurasi dengan menggunakan Naive Bayes: <b color='green'>{score_svmlk:.0%}</b></center>", unsafe_allow_html=True)
+                st.markdown(f"<center>Akurasi dengan menggunakan Naive Bayes: <b color='green'>{score_nblk:.0%}</b></center>", unsafe_allow_html=True)
         
         if (st.checkbox("Gunakan Metode Naive Bayes")):
                 y_pred = y_prednb
@@ -315,6 +315,20 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
                     data1.append(columns)
             
             st.dataframe(pd.DataFrame(data1[1:], columns=data1[0]), use_container_width=True)
+        
+        st.dataframe(pd.DataFrame({
+            "Algoritma": ['Support Vector Machine', 'Naive Bayes'],
+            "Score": [f"{score_svmlk:.0%}", f"{score_nblk:.0%}"]
+        }, columns=["Algoritma", "Score"]), use_container_width=True)
+        description_result = ""
+        description_result += f"Dapat disimpulkan bahwa data mining metode klasifikasi menggunakan algoritma Support Vector Machine menghasilkan akurasi sebesar **{score_svmlk:.0%}**, sedangkan algoritma Naive Bayes menghasilkan akurasi sebesar **{score_nblk:.0%}**"
+        st.info(description_result)
+        if (score_svmlk > score_nblk):
+            description_result += f".\nAlgoritma Support Vector Machine lebih besar dibandingkan dengan Naive Bayes"
+        else:
+            description_result += f".\nAlgoritma Naive Bayes lebih besar dibandingkan dengan Support Vector Machine"
+        st.info(description_result)
+
     except KeyError as errorKeyError:
         print(traceback.format_exc())
         st.error(f"""Maaf terjadi error {str(errorKeyError)}\n
