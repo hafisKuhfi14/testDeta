@@ -114,23 +114,29 @@ async def text_predictor():
             return
 
         svm, tfidf = pickle.load(pickle_in)
-        textPolarity = { "positive": [], "negative": [], "neutral": []}
+        textPolarity = {"term": [], "label": [], "score": []}
+        score = 0
         for text in text_predictor_clean['Text_Clean_split'][0]:
             y_pred, _ = model.predictFromPKL(tfidf, svm, [text])
-            print(y_pred)
+            textPolarity['term'].append(text)
+            textPolarity['label'].append(y_pred[0])
             if (y_pred[0] == "negative"):
-                textPolarity['negative'].append(text)
+                score -= 1
+                textPolarity["score"].append(-1) 
             if (y_pred[0] == "positive"):
-                textPolarity['positive'].append(text)
+                score += 1
+                textPolarity["score"].append(1) 
             if (y_pred[0] == "neutral"):
-                textPolarity['neutral'].append(text)
+                textPolarity["score"].append(0) 
 
-        y_pred, _ = model.predictFromPKL(tfidf, svm, [text_predictor])
-        if (y_pred[0] == "positive"):
+        # y_pred, _ = model.predictFromPKL(tfidf, svm, [text_predictor])
+        if (score > 0):
             st.success("Ulasan tersebut bernada positive 😊")
-        elif(y_pred[0] == "negative"):
+        elif(score < 0):
             st.error("Ulasan tersebut bernada negative 😡")
-        del textPolarity['neutral']
+        else:
+            st.info("Ulasan tersebut bernada neutral")
+        # del textPolarity['neutral']
         st.write("Sentimen Per-kata suatu ulasan")
         # Temukan panjang maksimum dari array dalam dictionary
         max_length = max(len(textPolarity[key]) for key in textPolarity) 
