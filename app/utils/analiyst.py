@@ -322,7 +322,6 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
         }, columns=["Algoritma", "Score"]), use_container_width=True)
         description_result = ""
         description_result += f"Dapat disimpulkan bahwa data mining metode klasifikasi menggunakan algoritma Support Vector Machine menghasilkan akurasi sebesar **{score_svmlk:.0%}**, sedangkan algoritma Naive Bayes menghasilkan akurasi sebesar **{score_nblk:.0%}**"
-        st.info(description_result)
         if (score_svmlk > score_nblk):
             description_result += f".\nAlgoritma Support Vector Machine lebih besar dibandingkan dengan Naive Bayes"
         else:
