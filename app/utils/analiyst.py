@@ -22,6 +22,8 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
     try:   
         # Menampilkan DataFrame
         st.dataframe(df.head(10))
+        st.write(f"Total Data: {len(df)}")
+
         
         expandData = st.checkbox("Expand All Data")
         st.write('You selected:', selectedColumn)
