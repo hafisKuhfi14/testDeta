@@ -105,7 +105,7 @@ def main():
     if not st.session_state['authentication_status']:
         selected = option_menu(
             menu_title=None,
-            options=["Login", "Register", "Lupa Password"],
+            options=["Login", "Register"],
             icons=["login", "register", "key"],  # https://icons.getbootstrap.com/
             orientation="horizontal",
         )

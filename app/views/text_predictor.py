@@ -33,8 +33,7 @@ async def text_predictor():
             svm, tfidf_svm = pickle.load(pickle_in_svm)
             nb, tfidf_nb = pickle.load(pickle_in_nb)
             st.markdown("### Support Vector Machine")
-            textPolarity2 = {"term": [], "label": [], "score": []}
-            st.write(text_predictor_clean['Text_Clean_split'])
+            textPolarity2 = {"term": [], "label": [], "score": []} 
             score = 0
             if (text_predictor_clean['Text_Clean_split'].empty):
                 st.info("Maaf sentimen ini bersifat neutral")
@@ -53,13 +52,6 @@ async def text_predictor():
                     textPolarity2["score"].append(0)
 
             text_predictor_clean['polarity_score'] = score
-            # y_pred, _ = model.predictFromPKL(tfidf_svm, svm, [text_predictor])
-            if (score > 0):
-                st.success("Ulasan tersebut bernada positive 😊")
-            elif(score < 0):
-                st.error("Ulasan tersebut bernada negative 😡")
-            else:
-                st.info("Ulasan tersebut bernada neutral")
             # del textPolarity['neutral']
             st.write("Sentimen Per-kata suatu ulasan")
             # Temukan panjang maksimum dari array dalam dictionary
@@ -68,6 +60,15 @@ async def text_predictor():
             data_equal_length = {key: textPolarity2[key] + [""] * (max_length - len(textPolarity2[key])) for key in textPolarity2}
             df = pd.DataFrame(data_equal_length) 
             st.table(df)
+            
+            # y_pred, _ = model.predictFromPKL(tfidf_svm, svm, [text_predictor])
+            if (score > 0):
+                st.success("Ulasan tersebut bernada positive 😊")
+            elif(score < 0):
+                st.error("Ulasan tersebut bernada negative 😡")
+            else:
+                st.info("Ulasan tersebut bernada neutral")
+                
             st.markdown("### TextPreprocessing")
             st.markdown("Text preprocessing adalah suatu proses untuk menyeleksi data text agar menjadi lebih terstruktur lagi dengan melalui serangkaian tahapan yang meliputi tahapan case folding, tokenizing, filtering dan stemming")
             text_preprocessing(text_predictor_clean)
@@ -91,13 +92,6 @@ async def text_predictor():
                     textPolarity2["score"].append(0) 
 
             text_predictor_clean['polarity_score'] = score
-            # y_pred, _ = model.predictFromPKL(tfidf_nb, nb, [text_predictor])
-            if (score > 0):
-                st.success("Ulasan tersebut bernada positive 😊")
-            elif(score < 0):
-                st.error("Ulasan tersebut bernada negative 😡")
-            else:
-                st.info("Ulasan tersebut bernada neutral")
             # del textPolarity['neutral']
             st.write("Sentimen Per-kata suatu ulasan")
             # Temukan panjang maksimum dari array dalam dictionary
@@ -106,6 +100,14 @@ async def text_predictor():
             data_equal_length = {key: textPolarity2[key] + [""] * (max_length - len(textPolarity2[key])) for key in textPolarity2}
             df = pd.DataFrame(data_equal_length) 
             st.table(df)
+
+            # y_pred, _ = model.predictFromPKL(tfidf_nb, nb, [text_predictor])
+            if (score > 0):
+                st.success("Ulasan tersebut bernada positive 😊")
+            elif(score < 0):
+                st.error("Ulasan tersebut bernada negative 😡")
+            else:
+                st.info("Ulasan tersebut bernada neutral")
 
             st.markdown("### TextPreprocessing")
             st.markdown("Text preprocessing adalah suatu proses untuk menyeleksi data text agar menjadi lebih terstruktur lagi dengan melalui serangkaian tahapan yang meliputi tahapan case folding, tokenizing, filtering dan stemming")
@@ -129,13 +131,6 @@ async def text_predictor():
             if (y_pred[0] == "neutral"):
                 textPolarity["score"].append(0) 
 
-        # y_pred, _ = model.predictFromPKL(tfidf, svm, [text_predictor])
-        if (score > 0):
-            st.success("Ulasan tersebut bernada positive 😊")
-        elif(score < 0):
-            st.error("Ulasan tersebut bernada negative 😡")
-        else:
-            st.info("Ulasan tersebut bernada neutral")
         # del textPolarity['neutral']
         st.write("Sentimen Per-kata suatu ulasan")
         # Temukan panjang maksimum dari array dalam dictionary
@@ -144,6 +139,14 @@ async def text_predictor():
         data_equal_length = {key: textPolarity[key] + [""] * (max_length - len(textPolarity[key])) for key in textPolarity}
         df = pd.DataFrame(data_equal_length)
         st.table(df)
+
+        # y_pred, _ = model.predictFromPKL(tfidf, svm, [text_predictor])
+        if (score > 0):
+            st.success("Ulasan tersebut bernada positive 😊")
+        elif(score < 0):
+            st.error("Ulasan tersebut bernada negative 😡")
+        else:
+            st.info("Ulasan tersebut bernada neutral")
 
         st.markdown("### TextPreprocessing")
         st.markdown("Text preprocessing adalah suatu proses untuk menyeleksi data text agar menjadi lebih terstruktur lagi dengan melalui serangkaian tahapan yang meliputi tahapan case folding, tokenizing, filtering dan stemming")

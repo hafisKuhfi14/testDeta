@@ -192,8 +192,10 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
             st.markdown("####  Sentiment count")
             st.markdown("Proses melakukan visualisasi total sentimen positif dan negatif pada ulasan menggunakan diagram pie")
             sentimentPolarity = df['polarity'].value_counts()
-            PdSentimentPolarity = pd.DataFrame({'Sentiment':sentimentPolarity.index,'Tweets':sentimentPolarity.values})
-            fig = px.pie(PdSentimentPolarity, values='Tweets', names='Sentiment')
+            PdSentimentPolarity = pd.DataFrame({'Sentiment':sentimentPolarity.index,'Ulasan':sentimentPolarity.values})
+            fig = px.pie(PdSentimentPolarity, values='Ulasan', names='Sentiment')
+            fig.update_traces(textinfo='percent+label', texttemplate='<b>%{label}<br> %{percent:.1%}</b>',textfont_size=14, marker=dict(colors=['#a21212', '#bbdeff']))
+            fig.update_layout(title=dict(text="Sentiment Layanan Internet IndiHome", font=dict(size=20)))
             st.plotly_chart(fig)
             st.markdown(f"total keseluruhan ulasan yang sudah melewati tahap cleaning adalah sebanyak: **{sentimentPolarity['positive'] + sentimentPolarity['negative']}**")
             st.markdown(f"Dari hasil perhitungan diketahui sentiment positive sebanyak **{sentimentPolarity['positive']}** dan sentiment negative sebanyak **{sentimentPolarity['negative']}**\n")
@@ -278,6 +280,8 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
                 ],
                 "alias": ["TP", "TN", "FP", "FN"]
             })
+            st.info(f"Diketahui data berhasil diuji dengan sentimen positif sebesar **{TP}**\n, lalu data berhasil diuji dengan sentimen negatif sebesar **{TN}**")
+            st.info(f"Diketahui data gagal diuji dengan sentimen positif sebesar **{FP}**\n, lalu data gagal diuji dengan sentimen negatif sebesar **{FN}**")
             rumusCol1, perhitunganCol2 = st.columns(2)
             with rumusCol1:    
                 st.markdown("#### Rumus Accuracy")
@@ -316,18 +320,19 @@ def analiystThisData(st: streamlitdata, df, selectedColumn = "responding", page 
                     data1.append(columns)
             
             st.dataframe(pd.DataFrame(data1[1:], columns=data1[0]), use_container_width=True)
+            st.info(f"Berdasarkan hasil pengujian menggunakan {data1[3][4]} data uji (support) mengandung layanan internet indihome, maka didapatkan nilai **precision** yang digunakan untuk mengukur prediksi sentimen positif atau negatif, adapun nilai **Recall** untuk mengukur seberapa baik model menemukan dan mengklasifikasikan dengan benar sentimen positif atau negatif, dan terdapat juga **F1-Score** digunakan untuk menggabungkan nilai rata-rata precision dan recall tentang performa model, maka didapat dari hasil F1-Score adalah **akurasi** sebesar {data1[3][3]}.")
         
         st.dataframe(pd.DataFrame({
             "Algoritma": ['Support Vector Machine', 'Naive Bayes'],
             "Score": [f"{score_svmlk:.0%}", f"{score_nblk:.0%}"]
         }, columns=["Algoritma", "Score"]), use_container_width=True)
         description_result = ""
-        description_result += f"Dapat disimpulkan bahwa data mining metode klasifikasi menggunakan algoritma Support Vector Machine menghasilkan akurasi sebesar **{score_svmlk:.0%}**, sedangkan algoritma Naive Bayes menghasilkan akurasi sebesar **{score_nblk:.0%}**"
+        # description_result += f"Dapat disimpulkan bahwa data mining metode klasifikasi menggunakan algoritma Support Vector Machine menghasilkan akurasi sebesar **{score_svmlk:.0%}**, sedangkan algoritma Naive Bayes menghasilkan akurasi sebesar **{score_nblk:.0%}**"
         if (score_svmlk > score_nblk):
-            description_result += f".\nAlgoritma Support Vector Machine lebih besar dibandingkan dengan Naive Bayes"
+            description_result += f".\nAlgoritma **Support Vector Machine** lebih besar dibandingkan dengan **Naive Bayes** dengan score **{score_svmlk:.0%}**"
         else:
-            description_result += f".\nAlgoritma Naive Bayes lebih besar dibandingkan dengan Support Vector Machine"
-        st.info(description_result)
+            description_result += f".\nAlgoritma **Naive Bayes** lebih besar dibandingkan dengan **Support Vector Machine** dengan score **{score_nblk:.0%}**"
+        st.info(f"Dapat disimpulkan Algoritma {description_result}")
 
     except KeyError as errorKeyError:
         print(traceback.format_exc())
