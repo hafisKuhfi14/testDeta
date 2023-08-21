@@ -1,7 +1,8 @@
 import streamlit as st
 import datetime
 import pandas as pd
-from ..utils.textCleaning import textCleaning, countTotalSentimentFrequency
+from ..utils.textCleaning import textCleaning, countTotalSentimentFrequency, positiveOrNegativeDictionary
+from ..modules import txt_preprocessing
 import io
 
 @st.cache_data
@@ -48,12 +49,31 @@ def report():
     filtered_df = df.loc[(df['postDate'] >= start_date) & (df['postDate'] <= end_date)]
 
     df, result = textCleaning(filtered_df)
-    df = df.drop(['retweets', 'likes', 'Text_Clean_split', 'username'], axis=1)
+    df = df.drop(['retweets', 'likes', 'username'], axis=1)
     st.dataframe(df, use_container_width=True)
     if (len(df[df.polarity == "positive"]) > len(df[df.polarity == "negative"])):
         st.success(f"Data lebih dominan bernada positive, {len(df[df.polarity == 'positive'])} polarity positive")
     else:
         st.error(f"Data lebih dominan bernada negative, {len(df[df.polarity == 'negative'])} polarity negative")
+
+    st.success("Sentimen Positive")
+    st.dataframe(df[df.polarity == "positive"]['Text_Clean'], use_container_width=True)
+    st.error("Sentimen Negative")
+    st.dataframe(df[df.polarity == "negative"]['Text_Clean'], use_container_width=True)
+
+    # ============ POSITIF / NEGATIF COUNTING
+    list_positive, list_negative = positiveOrNegativeDictionary()
+    result = df["Text_Clean_split"].apply(lambda text: txt_preprocessing.lexicon_indonesia(
+        text=text, list_positive=list_positive, list_negative=list_negative
+    ))
+    result = list(zip(*result))
+    positive_df, negative_df = countTotalSentimentFrequency(df, result)
+    
+    st.markdown("Top 20 kata dari label positif dan negatif")
+    with st.expander("All Positive Words", False):
+        st.dataframe(positive_df, use_container_width=True)
+    with st.expander("All Negative Words", False):
+        st.dataframe(negative_df, use_container_width=True)
 
     # ------ Download dataframe
     csv = convert_df(df)
