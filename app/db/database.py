@@ -55,3 +55,13 @@ def fetch_all_periods():
 def get_period(period):
     """If not found, the function will return None"""
     return db.get(period)
+
+def insert_review(testing_model, text):
+    """Insert history of testing, in sentiment predictor, return HTTPResponse"""
+    dbTestPred = deta.Base("testing_predictor")
+    return dbTestPred.insert({"text": text, "testing_model": testing_model})
+
+def fetch_all_reviewtest():
+    dbTestPred = deta.Base("testing_predictor")
+    res = dbTestPred.fetch()
+    return res.items
