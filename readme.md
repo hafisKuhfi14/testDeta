@@ -38,3 +38,5 @@ https://pypi.org/project/streamlit-chat/
 
 # Generate requirements.txt
 pipreqs --encoding utf-8 "./"
+https://pypi.org/project/hydralit-components/
+https://github.com/BugzTheBunny/streamlit_navbar
