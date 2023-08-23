@@ -120,11 +120,11 @@ def main():
         get_user = credentials.get("usernames")[f"{st.session_state['username']}"]
         if (get_user['role'] == "admin"):
             menu_data = [
-                {'id': 'Keluhan', 'icon': "far fa-copy", 'label':"Keluhan"},
-                {'id': 'Text Predictor','icon':"🐙",'label':"Text Predictor"},
+                {'id': 'Keluhan', 'icon': "💬", 'label':"Keluhan"},
+                {'id': 'Text Predictor','icon':"🔮",'label':"Text Predictor"},
                 {'id': 'File Predictor', 'icon': "far fa-chart-bar", 'label':"File Predictor"},#no tooltip message
-                {'id': 'Laporan','icon': "💀", 'label':"Laporan"},
-                {'id': 'Account Management','icon': "💀", 'label':"Account Management"}
+                {'id': 'Laporan','icon': "📄", 'label':"Laporan"},
+                {'id': 'Account Management','icon': "👤", 'label':"Account Management"}
             ]
             # sidebar_menu(["Home", "Keluhan", "Text Predictor", "File Predictor", "Laporan","Account Management"], authenticator, get_user)
         else:
